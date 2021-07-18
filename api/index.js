@@ -1,7 +1,7 @@
-const Gomunime = require("./client/Gomunime");
-
 const app = require("express")();
 const port = process.env.PORT || 5000;
+
+const Gomunime = require("./client/Gomunime");
 
 app.get("/", (req, res) => {
   res.json({
