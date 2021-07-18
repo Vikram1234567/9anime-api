@@ -1,6 +1,7 @@
-const axios = require("axios");
+const axios = require("axios").create({
+  baseURL: `https://gomunime.online`,
+});
 const cheerio = require("cheerio");
-const base = `https://gomunime.online/`;
 const domain = process.env.DOMAIN ?? "http://localhost:5000/";
 
 // Element Digest
@@ -31,7 +32,7 @@ const parseCarouselItem = (e) => {
 
 const ajaxRequest = async (query) => {
   const { data } = await axios({
-    url: base + "wp-admin/admin-ajax.php",
+    url: "/wp-admin/admin-ajax.php",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
     },
@@ -55,7 +56,7 @@ const homelist = async (list) => {
 class Gomunime {
   async home(req, res) {
     try {
-      const { data } = await axios.get(base);
+      const { data } = await axios.get("/");
       const $ = cheerio.load(data);
 
       const hl = ["e", "c", "la", "t"];
@@ -86,7 +87,7 @@ class Gomunime {
     try {
       const page = req.query.page ?? 1;
       const { data } = await axios.get(
-        `${base}page/${page}/?s=${encodeURIComponent(req.params.query)}`
+        `/page/${page}/?s=${encodeURIComponent(req.params.query)}`
       );
       const $ = cheerio.load(data);
       let next = $(".next");
