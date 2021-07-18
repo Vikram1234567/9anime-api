@@ -185,7 +185,7 @@ class Gomunime {
       const details = {
         id: responseUrl.split("/")[4],
         cover: $(".thumbposter > img").data("lazy-src"),
-        banner: $(".ime img").data("lazy-src"),
+        banner: $(".ime img").data("lazy-src").split("-300")[0] + ".jpg",
         title: $(".entry-title").text(),
         japanese: $(".alter").text(),
         score: $(`meta[itemprop="ratingValue"]`).attr("content"),
