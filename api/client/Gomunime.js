@@ -4,6 +4,40 @@ const axios = require("axios").create({
 const cheerio = require("cheerio");
 const domain = process.env.DOMAIN ?? "http://localhost:5000/";
 
+const toDate = (str) => {
+  const month = {
+    Januari: "January",
+    Februari: "February",
+    Maret: "March",
+    April: "April",
+    Mei: "May",
+    Juni: "June",
+    Juli: "July",
+    Agustus: "August",
+    September: "September",
+    Oktober: "October",
+    November: "November",
+    Desember: "December",
+  };
+  return new Date(
+    str.replace(
+      /Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember/,
+      (e) => month[e]
+    )
+  ).toLocaleDateString("id", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+const getTitle = (it) => {
+  let te = it;
+  const first = te.match(/OVA|BD|Episode/)?.index;
+  if (!first) return "Movie";
+  te = te.slice(first, te.indexOf("Sub Indo")).trim();
+  return te.includes("OVA") ? te.replace("Episode ", "") : te;
+};
+
 // Element Digest
 const parseCard = (e) => {
   const elem = cheerio.default(e);
@@ -100,6 +134,94 @@ class Gomunime {
         success: true,
         next,
         results: $(".anime-list > li").toArray().map(parseCard),
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: error.toString(),
+      });
+    }
+  }
+  async details(req, res) {
+    try {
+      const {
+        data,
+        request: {
+          res: { responseUrl },
+        },
+      } = await axios.get(`/anime/${req.params.id}`);
+      const $ = cheerio.load(data);
+
+      let type, status, total_episode, duration, studio, release_date;
+
+      $(".spe span").map((i, el) => {
+        const text = $(el).text().split(": ");
+        const value = text[1];
+        switch (text[0]) {
+          case "TYPE ":
+            type = value;
+            break;
+          case "STATUS ":
+            status = value;
+            break;
+          case "TOTAL EPISODE":
+            total_episode = value;
+            break;
+          case "DURASI":
+            duration = value;
+            break;
+          case "STUDIO":
+            studio = value;
+            break;
+          case "RILIS":
+            release_date = value;
+            break;
+          default:
+            break;
+        }
+      });
+
+      const details = {
+        id: responseUrl.split("/")[4],
+        cover: $(".thumbposter > img").data("lazy-src"),
+        banner: $(".ime img").data("lazy-src"),
+        title: $(".entry-title").text(),
+        japanese: $(".alter").text(),
+        score: $(`meta[itemprop="ratingValue"]`).attr("content"),
+        type,
+        status,
+        total_episode,
+        duration,
+        studio,
+        release_date,
+        genre: $(".genxed a")
+          .toArray()
+          .map((a) => {
+            const elem = $(a);
+            return {
+              id: elem.attr("href").split("/")[4],
+              text: elem.text(),
+            };
+          }),
+        synopsis: $(".entry-content").text(),
+      };
+      const parseEpisodeItem = (a) => {
+        return {
+          index: +a["ep-num"],
+          id: a["ep-link"].split("/")[3],
+          title: getTitle(a["ep-title"]),
+          date: toDate(a["ep-date"]),
+        };
+      };
+      const episode_list = JSON.parse(
+        data.split("episodelist = ")[1].split(";")[0]
+      ).map(parseEpisodeItem);
+
+      res.json({
+        success: true,
+        details,
+        episode_list,
       });
     } catch (error) {
       console.error(error);

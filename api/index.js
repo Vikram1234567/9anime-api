@@ -11,6 +11,7 @@ app.get("/", (req, res) => {
 });
 app.get("/home", Gomunime.home);
 app.get("/search/:query", Gomunime.search);
+app.get("/details/:id", Gomunime.details);
 app.use("*", (req, res) => {
   res.status(404).json({
     success: false,
