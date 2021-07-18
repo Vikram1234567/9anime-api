@@ -3,5 +3,23 @@
     "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.10",
     "express": "^4.17.1"
-  }
+  },
+  "name": "gomunime-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nunu27/gomunime-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nunu27/gomunime-api/issues"
+  },
+  "homepage": "https://github.com/Nunu27/gomunime-api#readme",
+  "description": ""
 }
