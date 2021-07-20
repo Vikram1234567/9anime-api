@@ -1,17 +1,14 @@
 const app = require("express")();
 const port = process.env.PORT || 5000;
-
-const Gomunime = require("./client/Gomunime");
+const Controller = require("./client/controller");
 
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "Gomunime API",
+    message: "9Anime API",
   });
 });
-app.get("/home", Gomunime.home);
-app.get("/search/:query", Gomunime.search);
-app.get("/details/:id", Gomunime.details);
+app.get("/home", Controller.home);
 app.use("*", (req, res) => {
   res.status(404).json({
     success: false,
