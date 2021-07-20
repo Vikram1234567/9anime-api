@@ -1,9 +1,16 @@
 const Agent = require("./Agent");
 
+const ajaxRequest = async (query) => {
+  const { data } = await Agent.get(
+    `ajax/home/widget?${new URLSearchParams(query).toString()}`
+  );
+  return data;
+};
+
 class Controller {
   async home(req, res) {
     try {
-      const { data } = await Agent.get("");
+      const { data } = await Agent.get("home");
       res.json({
         success: true,
         data,
