@@ -12,11 +12,11 @@ const getCookie = async () => {
     await axios.get("");
   } catch (error) {
     const { data } = error.response;
-    return parseCookie(
-      data
-        .slice(data.indexOf(",'"), data.indexOf("');</script>"))
-        .match(/[\w]{2}/g)
-    );
+    const a = data
+      .slice(data.indexOf(",'"), data.indexOf("');</script>"))
+      .match(/[\w]{2}/g);
+    if (!a.length) return await getCookie();
+    return parseCookie(a);
   }
 };
 class Agent {
