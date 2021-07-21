@@ -9,6 +9,7 @@ app.get("/", (req, res) => {
   });
 });
 app.get("/home", Controller.home);
+app.get("/browse/:name", Controller.browse);
 app.use("*", (req, res) => {
   res.status(404).json({
     success: false,

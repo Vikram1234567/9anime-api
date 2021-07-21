@@ -69,6 +69,30 @@ class Controller {
       });
     }
   }
+  async browse(req, res) {
+    try {
+      const { name } = req.params;
+      const page = req.query.page ?? 1;
+      const { html } = await ajaxRequest("home/widget", { name, page });
+      const $ = cheerio.load(html);
+
+      const results = $(".anime-list").find("li").toArray().map(parseCard);
+      res.json({
+        success: true,
+        next:
+          results.length < 15
+            ? null
+            : `${domain + req.path.substr(1)}?page=${+page + 1}`,
+        results,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: error.toString(),
+      });
+    }
+  }
 }
 
 module.exports = new Controller();
