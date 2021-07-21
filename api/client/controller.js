@@ -188,6 +188,7 @@ class Controller {
           .toArray()
           .map((e) => {
             const episode = $(e);
+            console.log(episode.data("sources"));
             return {
               base: episode.data("base"),
               normalized: episode.data("normalized"),
