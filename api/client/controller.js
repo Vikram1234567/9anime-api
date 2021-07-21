@@ -127,12 +127,12 @@ class Controller {
   async anime(req, res) {
     try {
       const id = req.params.id;
-      const [{ data }, { html }] = await Promise.all[
-        (Agent.get(`watch/${id}`),
+      const [{ data }, { html }] = await Promise.all([
+        Agent.get(`watch/${id}`),
         ajaxRequest(`anime/servers`, {
           id: id.split(".").pop(),
-        }))
-      ];
+        }),
+      ]);
       const $ = cheerio.load(data);
       const $ep = cheerio.load(html);
 
