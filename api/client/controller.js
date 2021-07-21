@@ -23,7 +23,7 @@ const parseCard = (e) => {
 };
 async function filter(filters) {
   const { data } = await Agent.get(
-    `filter?${filters.map((f) => f.join("=")).join("&")}`
+    `filter?${new URLSearchParams(filters).toString()}`
   );
   const $ = cheerio.load(data);
   return {
@@ -92,6 +92,20 @@ class Controller {
         message: error.toString(),
       });
     }
+  }
+  async search(req, res) {
+    const { query } = req.params;
+    const page = req.query.page ?? 1;
+    const { next, results } = await filter({
+      keyword: query,
+      page,
+    });
+
+    res.json({
+      success: true,
+      next: next ? `${domain + req.path.substr(1)}?page=${+page + 1}` : null,
+      results,
+    });
   }
 }
 
