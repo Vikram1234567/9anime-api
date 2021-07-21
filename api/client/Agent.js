@@ -1,9 +1,9 @@
 const axios = require("axios").create({
   baseURL: `https://9anime.to/`,
 });
-const parseCookie = (ia) => {
+const parseCookie = (str) => {
   var i,
-    a = ia;
+    a = str;
   for (i = 0; i < a.length; i++) a[i] = String.fromCharCode(parseInt(a[i], 16));
   return "waf_cv=" + a.join("") + "; max-age=8640000; path=/;";
 };
@@ -20,16 +20,8 @@ const getCookie = async () => {
   }
 };
 class Agent {
-  cookieGetter = async () => {
-    const updateCookie = async () => {
-      this.cookie = await getCookie();
-    };
-    await updateCookie();
-    setInterval(updateCookie, 8640000);
-  };
-
   async get(path) {
-    if (!this.cookie) await this.cookieGetter();
+    if (!this.cookie) this.cookie = await getCookie();
     return await axios.get(path, {
       headers: {
         Cookie: this.cookie,
@@ -37,7 +29,7 @@ class Agent {
     });
   }
   async request(options) {
-    if (!this.cookie) await this.cookieGetter();
+    if (!this.cookie) this.cookie = await getCookie();
     const { headers, ...other } = options ?? {};
     return await axios.get(path, {
       ...other,
