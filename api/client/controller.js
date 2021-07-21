@@ -146,22 +146,22 @@ class Controller {
               .toArray()
               .map((el) => ({
                 id: $(el).attr("href").split("/")[4],
-                title: $(el).data("title"),
+                title: $(el).attr("title"),
               }));
-          else return $(e).text();
+          else return $(e).text().trim();
         });
 
       res.json({
         success: true,
         details: {
           id,
-          thumb: $(".backdrop").attr("style").slice(22, -2),
+          thumb: $(".backdrop").attr("style").slice(23, -2),
           cover: $(".thumb img").first().attr("src"),
           title: {
             en: title.text(),
             jp: title.data("jtitle"),
           },
-          alias: $(".alias").text(),
+          alias: $(".alias").text().split(","),
           desc: $(".shorting").text(),
           type: meta[0],
           studios: meta[1],
@@ -188,12 +188,11 @@ class Controller {
           .toArray()
           .map((e) => {
             const episode = $(e);
-            console.log(episode.data("sources"));
             return {
               base: episode.data("base"),
-              normalized: episode.data("normalized"),
+              normalized: episode.data("name-normalized"),
               title: episode.text(),
-              sources: JSON.parse(episode.data("sources")),
+              sources: episode.data("sources"),
             };
           }),
       });
