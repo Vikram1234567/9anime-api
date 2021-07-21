@@ -8,13 +8,19 @@ const ajaxRequest = async (path, query) => {
   );
   return data;
 };
+
 const parseCard = (e) => {
   const elem = cheerio.default(e);
   const splitUrl = elem.find("a").first().attr("href").split("/");
   const img = elem.find("img");
+  const t = elem.find(".name");
+
   return {
-    id: splitUrl[4],
-    title: elem.find(".name").text(),
+    id: splitUrl[4] ?? splitUrl[2],
+    title: {
+      en: t.text(),
+      jp: t.data("jtitle"),
+    },
     cover: img.attr("src"),
     type: elem.find(".taglist span:not(.dub)").first().text(),
     episode: elem.find(".ep").text(),
@@ -45,7 +51,10 @@ class Controller {
         return {
           id: t.attr("href").split("/")[2],
           backdrop: backdropSty.slice(22, -2),
-          title: t.text(),
+          title: {
+            en: t.text(),
+            jp: t.data("jtitle"),
+          },
           synopsis: elem.find("p").text(),
         };
       };
@@ -94,18 +103,26 @@ class Controller {
     }
   }
   async search(req, res) {
-    const { query } = req.params;
-    const page = req.query.page ?? 1;
-    const { next, results } = await filter({
-      keyword: query,
-      page,
-    });
+    try {
+      const { query } = req.params;
+      const page = req.query.page ?? 1;
+      const { next, results } = await filter({
+        keyword: query,
+        page,
+      });
 
-    res.json({
-      success: true,
-      next: next ? `${domain + req.path.substr(1)}?page=${+page + 1}` : null,
-      results,
-    });
+      res.json({
+        success: true,
+        next: next ? `${domain + req.path.substr(1)}?page=${+page + 1}` : null,
+        results,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: error.toString(),
+      });
+    }
   }
 }
 
