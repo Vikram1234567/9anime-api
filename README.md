@@ -1,6 +1,6 @@
 # Unofficial 9Anime.to REST API
 
-This API Scrapes the website to get all useful data as possible
+This API scrapes all useful data from the website
 
 ## Getting Started
 
