@@ -4,7 +4,7 @@
     "cheerio": "^1.0.0-rc.10",
     "express": "^4.17.1"
   },
-  "name": "gomunime-api",
+  "name": "9anime-api",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -12,13 +12,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Nunu27/gomunime-api.git"
+    "url": "git+https://github.com/Nunu27/9anime-api.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Nunu27/gomunime-api/issues"
+    "url": "https://github.com/Nunu27/9anime-api/issues"
   },
-  "homepage": "https://github.com/Nunu27/gomunime-api#readme",
+  "homepage": "https://github.com/Nunu27/9anime-api#readme",
   "description": ""
 }
