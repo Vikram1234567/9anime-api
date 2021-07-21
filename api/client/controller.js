@@ -16,7 +16,7 @@ const parseCard = (e) => {
   const t = elem.find(".name");
 
   return {
-    id: splitUrl[4] ?? splitUrl[2],
+    id: (splitUrl[4] ?? splitUrl[2]).split("?")[0],
     title: {
       en: t.text(),
       jp: t.data("jtitle"),
@@ -115,6 +115,86 @@ class Controller {
         success: true,
         next: next ? `${domain + req.path.substr(1)}?page=${+page + 1}` : null,
         results,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: error.toString(),
+      });
+    }
+  }
+  async anime(req, res) {
+    try {
+      const id = req.params.id;
+      const [{ data }, { html }] = await Promise.all[
+        (Agent.get(`watch/${id}`),
+        ajaxRequest(`anime/servers`, {
+          id: id.split(".").pop(),
+        }))
+      ];
+      const $ = cheerio.load(data);
+      const $ep = cheerio.load(html);
+
+      const title = $(".title").first();
+      const meta = $(".meta span:not(.quality)")
+        .toArray()
+        .map((e, i) => {
+          if (i === 4)
+            return $(e)
+              .find("a")
+              .toArray()
+              .map((el) => ({
+                id: $(el).attr("href").split("/")[4],
+                title: $(el).data("title"),
+              }));
+          else return $(e).text();
+        });
+
+      res.json({
+        success: true,
+        details: {
+          id,
+          thumb: $(".backdrop").attr("style").slice(22, -2),
+          cover: $(".thumb img").first().attr("src"),
+          title: {
+            en: title.text(),
+            jp: title.data("jtitle"),
+          },
+          alias: $(".alias").text(),
+          desc: $(".shorting").text(),
+          type: meta[0],
+          studios: meta[1],
+          date_aired: meta[2],
+          status: meta[3],
+          genre: meta[4],
+          country: meta[5],
+          score: meta[6],
+          premiered: meta[7],
+          duration: meta[8],
+          quality: meta[9],
+          views: meta[10],
+        },
+        servers: $ep("span")
+          .toArray()
+          .map((e) => {
+            const server = $(e);
+            return {
+              id: server.data("id"),
+              name: server.text(),
+            };
+          }),
+        episode_list: $ep("li > a")
+          .toArray()
+          .map((e) => {
+            const episode = $(e);
+            return {
+              base: episode.data("base"),
+              normalized: episode.data("normalized"),
+              title: episode.text(),
+              sources: JSON.parse(episode.data("sources")),
+            };
+          }),
       });
     } catch (error) {
       console.error(error);
