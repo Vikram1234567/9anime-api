@@ -1,5 +1,7 @@
 const Agent = require("./Agent");
 const cheerio = require("cheerio");
+const CryptoJS = require("crypto-js");
+const getVideo = require("./getVideo");
 const domain = process.env.DOMAIN ?? "http://localhost:5000/";
 
 const ajaxRequest = async (path, query) => {
@@ -8,7 +10,6 @@ const ajaxRequest = async (path, query) => {
   );
   return data;
 };
-
 const parseCard = (e) => {
   const elem = cheerio.default(e);
   const splitUrl = elem.find("a").first().attr("href").split("/");
@@ -126,7 +127,7 @@ class Controller {
   }
   async anime(req, res) {
     try {
-      const id = req.params.id;
+      const { id } = req.params;
       const [{ data }, { html }] = await Promise.all([
         Agent.get(`watch/${id}`),
         ajaxRequest(`anime/servers`, {
@@ -201,6 +202,32 @@ class Controller {
       res.status(500).json({
         success: false,
         message: error.toString(),
+      });
+    }
+  }
+  async episode(req, res) {
+    let rawUrl = null;
+    try {
+      const { id } = req.params;
+      const { url } = await ajaxRequest("anime/episode", { id });
+
+      if (!url) throw new Error("Data not found");
+
+      const key = CryptoJS.enc.Utf8.parse(url.slice(0, 9));
+      const encrypted = CryptoJS.enc.Base64.parse(url.slice(9));
+      const decrypted = CryptoJS.RC4.decrypt(
+        { ciphertext: encrypted },
+        key
+      ).toString(CryptoJS.enc.Utf8);
+      rawUrl = decrypted;
+
+      res.json({ ...(await getVideo(decrypted)), rawUrl });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: error.toString(),
+        rawUrl,
       });
     }
   }

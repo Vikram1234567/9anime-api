@@ -8,10 +8,13 @@ app.get("/", (req, res) => {
     message: "9Anime API",
   });
 });
+
 app.get("/home", Controller.home);
 app.get("/browse/:name", Controller.browse);
 app.get("/search/:query", Controller.search);
 app.get("/anime/:id", Controller.anime);
+app.get("/episode/:id", Controller.episode);
+
 app.use("*", (req, res) => {
   res.status(404).json({
     success: false,
