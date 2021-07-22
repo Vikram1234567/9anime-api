@@ -1,4 +1,7 @@
 const axios = require("axios");
+axios.default.defaults.headers = {
+  referer: `https://9anime.to/`,
+};
 const cheerio = require("cheerio");
 
 function packed(p, a, c, k, e, d) {
@@ -8,32 +11,22 @@ function packed(p, a, c, k, e, d) {
   return p;
 }
 
-const fetchEmbed = async (url) => {
-  const { data } = await axios({
-    url,
-    headers: {
-      referer: "https://9anime.to/",
-    },
-  });
-  return data;
-};
-
 async function Vidstream(url) {
-  const embed = await fetchEmbed(url);
+  const { data: embed } = await axios.get(url);
   const id = url.split("/").pop();
   const skey = embed.split("window.skey = '")[1].split("'")[0];
 
-  const data = await fetchEmbed(
+  const { data } = await axios.get(
     `https://vidstream.pro/info/${id}?skey=${skey}`
   );
   return data;
 }
 async function MyCloud(url) {
-  const embed = await fetchEmbed(url);
+  const { data: embed } = await axios.get(url);
   const id = url.split("/").pop();
   const skey = embed.split("window.skey = '")[1].split("'")[0];
 
-  const data = await fetchEmbed(`https://mcloud.to/info/${id}?skey=${skey}`);
+  const { data } = await axios.get(`https://mcloud.to/info/${id}?skey=${skey}`);
   return data;
 }
 /*
@@ -72,10 +65,14 @@ module.exports = async (url) => {
     case url.includes("mcloud"):
       return await MyCloud(url);
 
-    default:
+    case url.includes("mp4upload"):
+    case url.includes("streamtape"):
       return {
         success: true,
         url,
       };
+
+    default:
+      throw new Error("Video host is not supported");
   }
 };
