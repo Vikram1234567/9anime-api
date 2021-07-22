@@ -17,7 +17,7 @@ const getWaf = async () => {
 };
 const ObjectToCookie = (obj) => {
   return Object.keys(obj)
-    .map((key) => `${key}=${obj[key]}`)
+    .map((key) => `${key}=${encodeURIComponent(obj[key])}`)
     .join("; ");
 };
 
