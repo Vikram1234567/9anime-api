@@ -5,7 +5,7 @@ const app = require("express")();
 const port = process.env.PORT || 5000;
 
 Agent.init().then(() => {
-  Controller.init(Agent);
+  const Base = new Controller(Agent);
 
   app.get("/", (req, res) => {
     res.json({
@@ -14,11 +14,11 @@ Agent.init().then(() => {
     });
   });
 
-  app.get("/home", Controller.home);
-  app.get("/browse/:name", Controller.browse);
-  app.get("/search/:query", Controller.search);
-  app.get("/anime/:id", Controller.anime);
-  app.get("/episode/:id", Controller.episode);
+  app.get("/home", Base.home);
+  app.get("/browse/:name", Base.browse);
+  app.get("/search/:query", Base.search);
+  app.get("/anime/:id", Base.anime);
+  app.get("/episode/:id", Base.episode);
 
   app.use("*", (req, res) => {
     res.status(404).json({
