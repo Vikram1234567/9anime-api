@@ -23,9 +23,8 @@ const parseCard = (e) => {
 };
 
 class Controller {
-  Agent = this.arg;
   constructor(agent) {
-    this.arg = agent;
+    this.Agent = agent;
   }
 
   ajaxRequest = async (path, query) => {
@@ -46,9 +45,7 @@ class Controller {
   }
 
   async home(req, res) {
-    console.log(this);
     try {
-      console.log(this);
       const { data } = await this.Agent.get("home");
       const $ = cheerio.load(data);
 
@@ -90,7 +87,7 @@ class Controller {
     try {
       const { name } = req.params;
       const page = req.query.page ?? 1;
-      const { html } = await ajaxRequest("home/widget", { name, page });
+      const { html } = await this.ajaxRequest("home/widget", { name, page });
       const $ = cheerio.load(html);
 
       const results = $(".anime-list").find("li").toArray().map(parseCard);
@@ -137,7 +134,7 @@ class Controller {
       const { id } = req.params;
       const [{ data }, { html }] = await Promise.all([
         this.Agent.get(`watch/${id}`),
-        ajaxRequest(`anime/servers`, {
+        this.ajaxRequest(`anime/servers`, {
           id: id.split(".").pop(),
         }),
       ]);
@@ -216,7 +213,7 @@ class Controller {
     let rawUrl, raw;
     try {
       const { id } = req.params;
-      const { url } = await ajaxRequest("anime/episode", { id });
+      const { url } = await this.ajaxRequest("anime/episode", { id });
 
       if (!url) throw new Error("Data not found");
       const key = CryptoJS.enc.Utf8.parse(url.slice(0, 9));
