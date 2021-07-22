@@ -46,7 +46,9 @@ class Controller {
   }
 
   async home(req, res) {
+    console.log(this);
     try {
+      console.log(this);
       const { data } = await this.Agent.get("home");
       const $ = cheerio.load(data);
 
