@@ -40,27 +40,25 @@ async function Streamtape(url) {
   const { data } = await axios.get(url);
   const $ = cheerio.load(data);
 
-  const {
-    request: {
-      res: { responseUrl },
-    },
-  } = await axios({
-    url: `https:${$("#videolink").text()}`,
-    method: "HEAD",
-  });
-
   return {
     success: true,
     media: {
       thumb: $('meta[name="og:image"]').attr("content"),
-      sources: [{ file: responseUrl }],
+      sources: [{ file: `https:${$("#videolink").text()}` }],
     },
   };
 }
 async function Mp4upload(url) {
   const data = await fetchEmbed(url);
+  const temp = eval(
+    `packed${data.split("return p}")[1].split(")))")[0]}))`
+  ).split('"');
   return {
-    data: eval(`packed${data.split("return p}")[1].split("</script>")[0]}`),
+    success: true,
+    media: {
+      thumb: temp[5],
+      sources: [{ file: temp[3] }],
+    },
   };
 }
 

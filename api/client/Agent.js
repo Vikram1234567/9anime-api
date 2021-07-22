@@ -1,5 +1,8 @@
 const axios = require("axios").create({
   baseURL: `https://9anime.to/`,
+  headers: {
+    referer: `https://9anime.to/`,
+  },
 });
 const parseCookie = (str) => {
   var i,
