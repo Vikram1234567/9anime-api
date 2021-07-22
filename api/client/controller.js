@@ -23,10 +23,9 @@ const parseCard = (e) => {
 };
 
 class Controller {
+  Agent = this.arg;
   constructor(agent) {
-    console.log(agent);
-    this.Agent = agent;
-    console.log(this.Agent);
+    this.arg = agent;
   }
 
   ajaxRequest = async (path, query) => {
