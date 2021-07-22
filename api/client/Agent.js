@@ -1,22 +1,18 @@
 const axios = require("axios").create({
   baseURL: `https://9anime.to/`,
 });
-const parseWaf = (str) => {
-  var i,
-    a = str;
-  for (i = 0; i < a.length; i++) a[i] = String.fromCharCode(parseInt(a[i], 16));
-  return a.join("");
-};
 const getWaf = async () => {
   try {
     await axios.get("");
   } catch (error) {
     const { data } = error.response;
-    const a = data
+    let a = data
       .slice(data.indexOf(",'"), data.indexOf("');</script>"))
       .match(/[\w]{2}/g);
     if (!a.length) return await getWaf();
-    return parseWaf(a);
+    for (let i = 0; i < a.length; i++)
+      a[i] = String.fromCharCode(parseInt(a[i], 16));
+    return a.join("");
   }
 };
 const ObjectToCookie = (obj) => {
