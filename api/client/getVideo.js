@@ -36,6 +36,7 @@ async function MyCloud(url) {
   const data = await fetchEmbed(`https://mcloud.to/info/${id}?skey=${skey}`);
   return data;
 }
+/*
 async function Streamtape(url) {
   const { data } = await axios.get(url);
   const $ = cheerio.load(data);
@@ -61,6 +62,7 @@ async function Mp4upload(url) {
     },
   };
 }
+*/
 
 module.exports = async (url) => {
   switch (true) {
@@ -70,13 +72,10 @@ module.exports = async (url) => {
     case url.includes("mcloud"):
       return await MyCloud(url);
 
-    case url.includes("streamtape"):
-      return await Streamtape(url);
-
-    case url.includes("mp4upload"):
-      return await Mp4upload(url);
-
     default:
-      throw new Error(`${url} is not supported`);
+      return {
+        success: true,
+        url,
+      };
   }
 };
