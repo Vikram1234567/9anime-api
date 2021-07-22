@@ -221,14 +221,13 @@ class Controller {
       raw = url;
       rawUrl = decrypted;
 
-      res.json(await getVideo(decrypted));
+      res.json({ ...(await getVideo(decrypted)), debug: { raw, url: rawUrl } });
     } catch (error) {
       console.error(error);
       res.status(500).json({
         success: false,
         message: error.toString(),
-        raw,
-        rawUrl,
+        debug: { raw, url: rawUrl },
       });
     }
   }
