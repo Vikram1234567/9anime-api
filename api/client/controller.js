@@ -33,7 +33,7 @@ class Controller {
     );
     return data;
   };
-  async filter(filters) {
+  filter = async (filters) => {
     const { data } = await this.Agent.get(
       `filter?${new URLSearchParams(filters).toString()}`
     );
@@ -42,7 +42,7 @@ class Controller {
       next: !$(".next.disabled").length,
       results: $(".anime-list > li").toArray().map(parseCard),
     };
-  }
+  };
 
   async home(req, res) {
     try {
@@ -111,7 +111,7 @@ class Controller {
     try {
       const { query } = req.params;
       const page = req.query.page ?? 1;
-      const { next, results } = await filter({
+      const { next, results } = await this.filter({
         keyword: query,
         page,
       });
