@@ -3,6 +3,11 @@ const cheerio = require("cheerio");
 const CryptoJS = require("crypto-js");
 const getVideo = require("./getVideo");
 const domain = process.env.DOMAIN ?? "http://localhost:5000/";
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 const ajaxRequest = async (path, query) => {
   const { data } = await Agent.get(
@@ -212,14 +217,13 @@ class Controller {
       const { url } = await ajaxRequest("anime/episode", { id });
 
       if (!url) throw new Error("Data not found");
-      console.log(url);
       const key = CryptoJS.enc.Utf8.parse(url.slice(0, 9));
       const encrypted = CryptoJS.enc.Base64.parse(url.slice(9));
       const decrypted = CryptoJS.RC4.decrypt(
         { ciphertext: encrypted },
         key
       ).toString(CryptoJS.enc.Utf8);
-      console.log(decrypted);
+      await sleep(500);
       rawUrl = decrypted;
 
       res.json({ ...(await getVideo(decrypted)), rawUrl });
