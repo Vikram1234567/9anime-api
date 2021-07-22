@@ -23,7 +23,7 @@ const parseCard = (e) => {
 };
 
 class Controller {
-  constructor(agent) {
+  init(agent) {
     this.Agent = agent;
   }
 
@@ -237,4 +237,4 @@ class Controller {
   }
 }
 
-module.exports = Controller;
+module.exports = new Controller();
