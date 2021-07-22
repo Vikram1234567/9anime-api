@@ -25,7 +25,6 @@ const parseCard = (e) => {
 class Controller {
   constructor(agent) {
     this.Agent = agent;
-    return this;
   }
 
   ajaxRequest = async (path, query) => {
