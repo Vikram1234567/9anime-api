@@ -22,8 +22,10 @@ const ObjectToCookie = (obj) => {
 };
 
 class Agent {
+  async init() {
+    this.waf_cv = await getWaf();
+  }
   async get(path, cookie = {}) {
-    if (!this.waf_cv) this.waf_cv = await getWaf();
     return await axios.get(path, {
       headers: {
         Cookie: ObjectToCookie({
@@ -34,7 +36,6 @@ class Agent {
     });
   }
   async request(options, cookie = {}) {
-    if (!this.waf_cv) this.waf_cv = await getWaf();
     const { headers, ...other } = options ?? {};
     return await axios.get(path, {
       ...other,

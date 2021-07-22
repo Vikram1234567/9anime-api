@@ -1,15 +1,8 @@
-const Agent = require("./Agent");
 const cheerio = require("cheerio");
 const CryptoJS = require("crypto-js");
 const getVideo = require("./getVideo");
 const domain = process.env.DOMAIN ?? "http://localhost:5000/";
 
-const ajaxRequest = async (path, query) => {
-  const { data } = await Agent.get(
-    `ajax/${path}?${new URLSearchParams(query).toString()}`
-  );
-  return data;
-};
 const parseCard = (e) => {
   const elem = cheerio.default(e);
   const splitUrl = elem.find("a").first().attr("href").split("/");
@@ -28,21 +21,32 @@ const parseCard = (e) => {
     dub: !!elem.find(".dub").length,
   };
 };
-async function filter(filters) {
-  const { data } = await Agent.get(
-    `filter?${new URLSearchParams(filters).toString()}`
-  );
-  const $ = cheerio.load(data);
-  return {
-    next: !$(".next.disabled").length,
-    results: $(".anime-list > li").toArray().map(parseCard),
-  };
-}
 
 class Controller {
+  constructor(agent) {
+    this.Agent = agent;
+  }
+
+  ajaxRequest = async (path, query) => {
+    const { data } = await this.Agent.get(
+      `ajax/${path}?${new URLSearchParams(query).toString()}`
+    );
+    return data;
+  };
+  async filter(filters) {
+    const { data } = await this.Agent.get(
+      `filter?${new URLSearchParams(filters).toString()}`
+    );
+    const $ = cheerio.load(data);
+    return {
+      next: !$(".next.disabled").length,
+      results: $(".anime-list > li").toArray().map(parseCard),
+    };
+  }
+
   async home(req, res) {
     try {
-      const { data } = await Agent.get("home");
+      const { data } = await this.Agent.get("home");
       const $ = cheerio.load(data);
 
       const parseCarouselItem = (el) => {
@@ -129,7 +133,7 @@ class Controller {
     try {
       const { id } = req.params;
       const [{ data }, { html }] = await Promise.all([
-        Agent.get(`watch/${id}`),
+        this.Agent.get(`watch/${id}`),
         ajaxRequest(`anime/servers`, {
           id: id.split(".").pop(),
         }),
@@ -233,4 +237,4 @@ class Controller {
   }
 }
 
-module.exports = new Controller();
+module.exports = Controller;
