@@ -2,8 +2,6 @@ const axios = require("axios");
 axios.default.defaults.headers = {
   referer: `https://9anime.to/`,
   "user-agent": `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36`,
-  "x-requested-with": "XMLHttpRequest",
-  "x-cookie": "player_autoplay=0",
 };
 const cheerio = require("cheerio");
 
