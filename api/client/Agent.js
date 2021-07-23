@@ -16,13 +16,8 @@ const getWaf = async () => {
   }
 };
 const ObjectToCookie = (obj) => {
-  const cookies = {
-    ...obj,
-    "max-age": 8640000,
-    path: "/",
-  };
-  return Object.keys(cookies)
-    .map((key) => `${key}=${encodeURIComponent(cookies[key])}`)
+  return Object.keys(obj)
+    .map((key) => `${key}=${encodeURIComponent(obj[key])}`)
     .join("; ");
 };
 
