@@ -1,9 +1,24 @@
-const axios = require("axios").create({
-  baseURL: `https://9anime.to/`,
-});
-const getWaf = async () => {
+const axios = require("axios");
+const domains = ["to", "ru", "pw", "at", "cz"];
+async function requestAgent(options, index = 0) {
+  const { url = "", ...otherOptions } = options;
+  const domain = domains[index];
+  if (!domain) throw new Error("Invalid Domain Index");
+  return await axios({
+    url: `https://9anime.${domain}/${url}`,
+    ...otherOptions,
+  });
+}
+
+const getWaf = async (domain) => {
   try {
-    await axios.get("");
+    await requestAgent(
+      {
+        url: "",
+        method: "GET",
+      },
+      domain
+    );
   } catch (error) {
     const { data } = error.response;
     let a = data
@@ -23,30 +38,40 @@ const ObjectToCookie = (obj) => {
 
 class Agent {
   async init() {
-    this.waf_cv = await getWaf();
+    this.domain = process.env.DOMAIN ? 0 : 2;
+    this.waf_cv = await getWaf(this.domain);
   }
   async get(path, cookie = {}) {
-    return await axios.get(path, {
-      headers: {
-        Cookie: ObjectToCookie({
-          ...cookie,
-          waf_cv: this.waf_cv,
-        }),
+    return await requestAgent(
+      {
+        url: path,
+        headers: {
+          Cookie: ObjectToCookie({
+            ...cookie,
+            waf_cv: this.waf_cv,
+          }),
+        },
+        method: "GET",
       },
-    });
+      this.domain
+    );
   }
   async request(options, cookie = {}) {
-    const { headers, ...other } = options ?? {};
-    return await axios.get(path, {
-      ...other,
-      headers: {
-        ...headers,
-        Cookie: ObjectToCookie({
-          ...cookie,
-          waf_cv: this.waf_cv,
-        }),
+    const { url, headers, ...other } = options ?? {};
+    return await requestAgent(
+      {
+        url,
+        ...other,
+        headers: {
+          ...headers,
+          Cookie: ObjectToCookie({
+            ...cookie,
+            waf_cv: this.waf_cv,
+          }),
+        },
       },
-    });
+      this.domain
+    );
   }
 }
 
