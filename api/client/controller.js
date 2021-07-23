@@ -216,13 +216,15 @@ class Controller {
       const { url } = await this.ajaxRequest("anime/episode", { id });
 
       if (!url) throw new Error("Data not found");
+      raw = url;
+      if (url.length !== 65) throw new Error("Fetched Invalid Data");
+      console.log(url.length);
       const key = CryptoJS.enc.Utf8.parse(url.slice(0, 9));
       const encrypted = CryptoJS.enc.Base64.parse(url.slice(9));
       const decrypted = CryptoJS.RC4.decrypt(
         { ciphertext: encrypted },
         key
       ).toString(CryptoJS.enc.Utf8);
-      raw = url;
       rawUrl = decrypted;
 
       res.json({ ...(await getVideo(decrypted)), debug: { raw, url: rawUrl } });
