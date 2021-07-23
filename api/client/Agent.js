@@ -1,7 +1,7 @@
 const axios = require("axios").create({
   baseURL: `https://9anime.to/`,
 });
-const getCookie = async () => {
+const getWaf = async () => {
   try {
     await axios.get("");
   } catch (error) {
@@ -9,13 +9,12 @@ const getCookie = async () => {
     let a = data
       .slice(data.indexOf(",'"), data.indexOf("');</script>"))
       .match(/[\w]{2}/g);
-    if (!a.length) return await getCookie();
+    if (!a.length) return await getWaf();
     for (let i = 0; i < a.length; i++)
       a[i] = String.fromCharCode(parseInt(a[i], 16));
-    return "waf_cv=" + a.join("") + "; max-age=8640000; path=/;";
+    return a.join("");
   }
 };
-
 const ObjectToCookie = (obj) => {
   return Object.keys(obj)
     .map((key) => `${key}=${encodeURIComponent(obj[key])}`)
@@ -24,12 +23,15 @@ const ObjectToCookie = (obj) => {
 
 class Agent {
   async init() {
-    this.cookie = await getCookie();
+    this.waf_cv = await getWaf();
   }
   async get(path, cookie = {}) {
     return await axios.get(path, {
       headers: {
-        Cookie: this.cookie,
+        Cookie: ObjectToCookie({
+          ...cookie,
+          waf_cv: this.waf_cv,
+        }),
       },
     });
   }
@@ -39,7 +41,10 @@ class Agent {
       ...other,
       headers: {
         ...headers,
-        Cookie: this.cookie,
+        Cookie: ObjectToCookie({
+          ...cookie,
+          waf_cv: this.waf_cv,
+        }),
       },
     });
   }
