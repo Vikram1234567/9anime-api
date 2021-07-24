@@ -1,6 +1,5 @@
 const cheerio = require("cheerio");
 const CryptoJS = require("crypto-js");
-const { cycleDomain } = require("../client/Agent");
 const getVideo = require("../client/getVideo");
 const domain = process.env.DOMAIN ?? "http://localhost:5000/";
 
@@ -45,7 +44,8 @@ class BaseController {
     };
   };
   fetchEpisode = async (id) => {
-    const { url } = await this.ajaxRequest("anime/episode", { id });
+    const res = (url = await this.ajaxRequest("anime/episode", { id }));
+    console.log(res);
     if (!url) throw new Error("Data not found");
     console.log(url);
     if (url.length !== 65) {
@@ -177,7 +177,7 @@ class BaseController {
             en: title.text(),
             jp: title.data("jtitle"),
           },
-          alias: $(".alias").text().split(","),
+          alias: $(".alias").text(),
           desc: $(".shorting").text(),
           type: meta[0],
           studios: meta[1],
