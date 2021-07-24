@@ -1,5 +1,6 @@
 const cheerio = require("cheerio");
 const CryptoJS = require("crypto-js");
+const { cycleDomain } = require("../client/Agent");
 const getVideo = require("../client/getVideo");
 const domain = process.env.DOMAIN ?? "http://localhost:5000/";
 
@@ -42,6 +43,15 @@ class BaseController {
       next: !$(".next.disabled").length,
       results: $(".anime-list > li").toArray().map(parseCard),
     };
+  };
+  fetchEpisode = async (id) => {
+    const { url } = await this.ajaxRequest("anime/episode", { id });
+    if (!url) throw new Error("Data not found");
+    if (url.length !== 65) {
+      this.Agent.cycleDomain();
+      return await this.fetchEpisode(id);
+    }
+    return url;
   };
 
   async home(req, res) {
@@ -213,11 +223,8 @@ class BaseController {
     let rawUrl, raw;
     try {
       const { id } = req.params;
-      const { url } = await this.ajaxRequest("anime/episode", { id });
-
-      if (!url) throw new Error("Data not found");
+      const url = await this.fetchEpisode(id);
       raw = url;
-      if (url.length !== 65) throw new Error("Fetched Invalid Data");
       const key = CryptoJS.enc.Utf8.parse(url.slice(0, 9));
       const encrypted = CryptoJS.enc.Base64.parse(url.slice(9));
       const decrypted = CryptoJS.RC4.decrypt(
