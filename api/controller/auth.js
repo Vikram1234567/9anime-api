@@ -24,7 +24,6 @@ class AuthController {
         method: "POST",
         headers: {
           "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-          referer: "https://9anime.pw/",
         },
         data: `username=${username}&password=${password}&remember=on`,
       });
