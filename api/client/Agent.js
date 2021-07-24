@@ -43,16 +43,20 @@ const ObjectToCookie = (obj) => {
 
 class Agent {
   async init() {
+    this.session = null;
     this.domain = process.env.DOMAIN ? 0 : 2;
     this.waf_cv = await getWaf(this.domain);
   }
   async get(path, cookie = {}) {
+    const { session: s, otherCookie } = cookie;
+    const session = s ?? this.session;
     return await requestAgent(
       {
         url: path,
         headers: {
           Cookie: ObjectToCookie({
-            ...cookie,
+            ...otherCookie,
+            session,
             waf_cv: this.waf_cv,
           }),
         },
@@ -62,6 +66,8 @@ class Agent {
     );
   }
   async request(options, cookie = {}) {
+    const { session: s, otherCookie } = cookie;
+    const session = s ?? this.session;
     const { url, headers, ...other } = options ?? {};
     return await requestAgent(
       {
@@ -70,7 +76,8 @@ class Agent {
         headers: {
           ...headers,
           Cookie: ObjectToCookie({
-            ...cookie,
+            ...otherCookie,
+            session,
             waf_cv: this.waf_cv,
           }),
         },
