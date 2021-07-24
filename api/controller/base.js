@@ -47,6 +47,7 @@ class BaseController {
   fetchEpisode = async (id) => {
     const { url } = await this.ajaxRequest("anime/episode", { id });
     if (!url) throw new Error("Data not found");
+    console.log(url);
     if (url.length !== 65) {
       this.Agent.cycleDomain();
       return await this.fetchEpisode(id);
