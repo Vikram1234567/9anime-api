@@ -1,6 +1,6 @@
 const cheerio = require("cheerio");
 const CryptoJS = require("crypto-js");
-const getVideo = require("./getVideo");
+const getVideo = require("../client/getVideo");
 const domain = process.env.DOMAIN ?? "http://localhost:5000/";
 
 const parseCard = (e) => {
@@ -22,7 +22,7 @@ const parseCard = (e) => {
   };
 };
 
-class Controller {
+class BaseController {
   constructor(agent) {
     this.Agent = agent;
   }
@@ -218,7 +218,6 @@ class Controller {
       if (!url) throw new Error("Data not found");
       raw = url;
       if (url.length !== 65) throw new Error("Fetched Invalid Data");
-      console.log(url.length);
       const key = CryptoJS.enc.Utf8.parse(url.slice(0, 9));
       const encrypted = CryptoJS.enc.Base64.parse(url.slice(9));
       const decrypted = CryptoJS.RC4.decrypt(
@@ -239,4 +238,4 @@ class Controller {
   }
 }
 
-module.exports = Controller;
+module.exports = BaseController;

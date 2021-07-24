@@ -1,12 +1,24 @@
 const Agent = require("./client/Agent");
-const Controller = require("./client/controller");
+const BaseController = require("./controller/base");
+const AuthController = require("./controller/auth");
 
-const app = require("express")();
+const express = require("express");
+const app = express();
+const authRoutes = express.Router();
 const port = process.env.PORT || 5000;
 
-Agent.init().then(() => {
-  const Base = new Controller(Agent);
+app.use(express.json());
 
+Agent.init().then(() => {
+  const Base = new BaseController(Agent);
+  const Auth = new AuthController(Agent);
+
+  // Auth Router
+
+  authRoutes.post("/login", Auth.login.bind(Auth));
+  authRoutes.post("/panel", Auth.panel.bind(Auth));
+
+  // Base
   app.get("/", (req, res) => {
     res.json({
       success: true,
@@ -19,7 +31,7 @@ Agent.init().then(() => {
   app.get("/search/:query", Base.search.bind(Base));
   app.get("/anime/:id", Base.anime.bind(Base));
   app.get("/episode/:id", Base.episode.bind(Base));
-
+  app.use("/user", authRoutes);
   app.use("*", (req, res) => {
     res.status(404).json({
       success: false,
