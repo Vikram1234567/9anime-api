@@ -21,10 +21,18 @@ const parseCard = (e) => {
     dub: !!elem.find(".dub").length,
   };
 };
+const decryptURL = (url) => {
+  const key = CryptoJS.enc.Utf8.parse(url.slice(0, 9));
+  const encrypted = CryptoJS.enc.Base64.parse(url.slice(9));
+  return CryptoJS.RC4.decrypt({ ciphertext: encrypted }, key).toString(
+    CryptoJS.enc.Utf8
+  );
+};
 
 class BaseController {
-  constructor(agent) {
+  constructor(agent, reqbin) {
     this.Agent = agent;
+    this.Reqbin = reqbin;
   }
 
   ajaxRequest = async (path, query) => {
@@ -217,16 +225,18 @@ class BaseController {
       const { url } = response;
       console.log(response);
       if (!url) throw new Error("Data not found");
+      const decrypted = decryptURL(url);
       raw = url;
-      const key = CryptoJS.enc.Utf8.parse(url.slice(0, 9));
-      const encrypted = CryptoJS.enc.Base64.parse(url.slice(9));
-      const decrypted = CryptoJS.RC4.decrypt(
-        { ciphertext: encrypted },
-        key
-      ).toString(CryptoJS.enc.Utf8);
       rawUrl = decrypted;
-
-      res.json({ ...(await getVideo(decrypted)), debug: { raw, url: rawUrl } });
+      let vidData = {};
+      try {
+        vidData = await getVideo(decrypted);
+      } catch (error) {
+        const reqb = await this.Reqbin.fetchEpisode(id);
+        const decr = decryptURL(reqb.url);
+        vidData = await getVideo(decr);
+      }
+      res.json({ ...vidData, debug: { raw, url: rawUrl } });
     } catch (error) {
       console.error(error);
       res.status(500).json({

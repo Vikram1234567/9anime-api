@@ -3,14 +3,15 @@ const BaseController = require("./controller/base");
 const AuthController = require("./controller/auth");
 
 const express = require("express");
+const Reqbin = require("./client/Reqbin");
 const app = express();
 const authRoutes = express.Router();
 const port = process.env.PORT || 5000;
 
 app.use(express.json());
 
-Agent.init().then(() => {
-  const Base = new BaseController(Agent);
+Promise.all([Agent.init(), Reqbin.init()]).then(() => {
+  const Base = new BaseController(Agent, Reqbin);
   const Auth = new AuthController(Agent);
 
   // Auth Router
