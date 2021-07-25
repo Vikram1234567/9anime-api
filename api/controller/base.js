@@ -218,7 +218,6 @@ class BaseController {
       console.log(response);
       if (!url) throw new Error("Data not found");
       raw = url;
-      if (!url.endsWith("==")) throw new Error("Invalid data fetched");
       const key = CryptoJS.enc.Utf8.parse(url.slice(0, 9));
       const encrypted = CryptoJS.enc.Base64.parse(url.slice(9));
       const decrypted = CryptoJS.RC4.decrypt(
