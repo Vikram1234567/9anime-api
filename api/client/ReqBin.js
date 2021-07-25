@@ -46,6 +46,7 @@ const getWaf = (data) => {
     a[i] = String.fromCharCode(parseInt(a[i], 16));
   return a.join("");
 };
+
 class ReqBin {
   async init() {
     const data = await ReqbinRequest("");

@@ -1,9 +1,9 @@
 const Agent = require("./client/Agent");
+const Reqbin = require("./client/Reqbin");
 const BaseController = require("./controller/base");
 const AuthController = require("./controller/auth");
 
 const express = require("express");
-const Reqbin = require("./client/Reqbin");
 const app = express();
 const authRoutes = express.Router();
 const port = process.env.PORT || 5000;
