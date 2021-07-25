@@ -43,18 +43,6 @@ class BaseController {
       results: $(".anime-list > li").toArray().map(parseCard),
     };
   };
-  fetchEpisode = async (id) => {
-    const res = await this.ajaxRequest("anime/episode", { id });
-    const { url } = res;
-    console.log(res);
-    if (!url) throw new Error("Data not found");
-    console.log(url);
-    if (url.length !== 65) {
-      this.Agent.cycleDomain();
-      return await this.fetchEpisode(id);
-    }
-    return url;
-  };
 
   async home(req, res) {
     try {
@@ -225,8 +213,12 @@ class BaseController {
     let rawUrl, raw;
     try {
       const { id } = req.params;
-      const url = await this.fetchEpisode(id);
+      const response = await this.ajaxRequest("anime/episode", { id });
+      const { url } = response;
+      console.log(response);
+      if (!url) throw new Error("Data not found");
       raw = url;
+      if (!url.endsWith("==")) throw new Error("Invalid data fetched");
       const key = CryptoJS.enc.Utf8.parse(url.slice(0, 9));
       const encrypted = CryptoJS.enc.Base64.parse(url.slice(9));
       const decrypted = CryptoJS.RC4.decrypt(

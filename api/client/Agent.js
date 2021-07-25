@@ -1,8 +1,6 @@
 const axios = require("axios");
-const domains = ["to", "ru", "pw", "at", "cz"];
-async function requestAgent(options, index = 0) {
+async function requestAgent(options, domain) {
   const { url = "", headers, ...otherOptions } = options;
-  const domain = domains[index];
   if (!domain) throw new Error("Invalid Domain Index");
   return await axios({
     url: `https://9anime.${domain}/${url}`,
@@ -43,15 +41,8 @@ const ObjectToCookie = (obj) => {
 
 class Agent {
   async init() {
-    this.domain = process.env.DOMAIN ? 0 : 2;
+    this.domain = process.env.DOMAIN ? "to" : "pw";
     this.waf_cv = await getWaf(this.domain);
-  }
-  cycleDomain() {
-    this.domain += 1;
-    if (!domains[this.domain]) {
-      this.domain = 0;
-      throw new Error("Domain full cycle");
-    }
   }
   async get(path, cookie = {}) {
     return await requestAgent(
