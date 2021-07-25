@@ -1,5 +1,5 @@
 const Agent = require("./client/Agent");
-const Reqbin = require("./client/Reqbin");
+const Reqbin = require("./client/ReqBin");
 const BaseController = require("./controller/base");
 const AuthController = require("./controller/auth");
 
