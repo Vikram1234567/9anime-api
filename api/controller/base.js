@@ -44,7 +44,8 @@ class BaseController {
     };
   };
   fetchEpisode = async (id) => {
-    const res = (url = await this.ajaxRequest("anime/episode", { id }));
+    const res = await this.ajaxRequest("anime/episode", { id });
+    const { url } = res;
     console.log(res);
     if (!url) throw new Error("Data not found");
     console.log(url);
