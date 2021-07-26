@@ -64,6 +64,80 @@ class AuthController {
       });
     }
   }
+  async watchlist(req, res) {
+    try {
+      const { session } = req.body;
+      if (!session) throw new Error("Forbidden");
+
+      const { data } = this.Agent.get("user/watchlist", { session });
+      const $ = cheerio.load(data);
+
+      const list = $(".anime-list-v li")
+        .toArray()
+        .map((e) => {
+          const elem = $(e);
+          const t = elem.find("a");
+          return {
+            id: t.attr("src").split("/")[2].split("?")[0],
+            title: {
+              en: t.text(),
+              jp: t.data("jtitle"),
+            },
+            cover: elem.find("img").attr("src"),
+            episode: elem.find(".ep").text(),
+            folder: elem.find(".folder span").text(),
+            bookmarked: elem.find(".bookmarked").text().trim(),
+            watchstatus: elem.find(".watchstatus").data("value"),
+          };
+        });
+      res.json({
+        success: true,
+        list,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+  }
+  async watchlist_edit(req, res) {
+    try {
+      const { id, folder, session } = req.body;
+      const {
+        data: {
+          error,
+          messages: [message],
+        },
+      } = await this.Agent.request(
+        {
+          url: `ajax/user/watchlist-edit`,
+          method: "POST",
+          headers: {
+            "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+          },
+          data: `id=${id}&folder=${folder}`,
+        },
+        { session }
+      );
+
+      if (error)
+        return res.status(403).json({
+          success: false,
+          message,
+        });
+
+      res.json({
+        success: true,
+        message,
+      });
+    } catch (er) {
+      console.error(er);
+      const { data } = er.response;
+      res.status(500).json(data);
+    }
+  }
 }
 
 module.exports = AuthController;
