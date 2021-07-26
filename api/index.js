@@ -18,6 +18,8 @@ Promise.all([Agent.init(), Reqbin.init()]).then(() => {
 
   authRoutes.post("/login", Auth.login.bind(Auth));
   authRoutes.post("/panel", Auth.panel.bind(Auth));
+  authRoutes.post("/watchlist", Auth.watchlist.bind(Auth));
+  authRoutes.post("/watchlist-edit", Auth.watchlist_edit.bind(Auth));
 
   // Base
   app.get("/", (req, res) => {
@@ -30,8 +32,10 @@ Promise.all([Agent.init(), Reqbin.init()]).then(() => {
   app.get("/home", Base.home.bind(Base));
   app.get("/browse/:name", Base.browse.bind(Base));
   app.get("/search/:query", Base.search.bind(Base));
+  app.get("/genre/:id", Base.genre.bind(Base));
   app.get("/anime/:id", Base.anime.bind(Base));
   app.get("/episode/:id", Base.episode.bind(Base));
+  app.get("/filter", Base.filter.bind(Base));
   app.use("/user", authRoutes);
   app.use("*", (req, res) => {
     res.status(404).json({

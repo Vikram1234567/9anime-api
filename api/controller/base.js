@@ -41,7 +41,7 @@ class BaseController {
     );
     return data;
   };
-  filter = async (filters) => {
+  filterRequest = async (filters) => {
     const { data } = await this.Agent.get(
       `filter?${new URLSearchParams(filters).toString()}`
     );
@@ -119,7 +119,7 @@ class BaseController {
     try {
       const { query } = req.params;
       const page = req.query.page ?? 1;
-      const { next, results } = await this.filter({
+      const { next, results } = await this.filterRequest({
         keyword: query,
         page,
       });
@@ -243,6 +243,84 @@ class BaseController {
         success: false,
         message: error.toString(),
         debug: { raw, url: rawUrl },
+      });
+    }
+  }
+  async genre(req, res) {
+    try {
+      const { id } = req.params;
+      const page = req.query.page ?? 1;
+      const { next, results } = await this.filterRequest({
+        "genre[]": id,
+        page,
+      });
+
+      res.json({
+        success: true,
+        next: next ? `${domain + req.path.substr(1)}?page=${+page + 1}` : null,
+        results,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: error.toString(),
+      });
+    }
+  }
+  async filter(req, res) {
+    try {
+      let {
+        genre,
+        keyword,
+        season,
+        type,
+        language,
+        country,
+        year,
+        status,
+        sort,
+        page,
+      } = req.query;
+      if (!page) page = 1;
+      let query = [];
+
+      query.push((genre ?? []).map((a) => ["genre[]", a]));
+      query.push((season ?? []).map((a) => ["season[]", a]));
+      query.push((type ?? []).map((a) => ["type[]", a]));
+      query.push((language ?? []).map((a) => ["language[]", a]));
+      query.push((country ?? []).map((a) => ["country[]", a]));
+      query.push((year ?? []).map((a) => ["year[]", a]));
+
+      query = query.flat();
+
+      if (keyword) query.push(["keyword", keyword]);
+      if (status) query.push(["status", status]);
+      if (sort) query.push(["sort", sort]);
+      query.push(["page", page]);
+
+      const { data } = await this.Agent.get(
+        `filter?${new URLSearchParams(query).toString()}`
+      );
+
+      query.pop();
+      query.push(["page", +page + 1]);
+
+      const $ = cheerio.load(data);
+      res.json({
+        success: true,
+        next: !$(".next.disabled").length
+          ? `${domain + req.path.substr(1)}?${new URLSearchParams(
+              query
+            ).toString()}`
+          : null,
+        results: $(".anime-list > li").toArray().map(parseCard),
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: error.toString(),
       });
     }
   }
