@@ -221,22 +221,14 @@ class BaseController {
     let rawUrl, raw;
     try {
       const { id } = req.params;
-      const response = await this.ajaxRequest("anime/episode", { id });
-      const { url } = response;
-      console.log(response);
+      const { url } = await this.Reqbin.fetchEpisode(id);
       if (!url) throw new Error("Data not found");
+
       const decrypted = decryptURL(url);
       raw = url;
       rawUrl = decrypted;
-      let vidData = {};
-      try {
-        vidData = await getVideo(decrypted);
-      } catch (error) {
-        const reqb = await this.Reqbin.fetchEpisode(id);
-        const decr = decryptURL(reqb.url);
-        vidData = await getVideo(decr);
-      }
-      res.json({ ...vidData, debug: { raw, url: rawUrl } });
+
+      res.json({ ...(await getVideo(decrypted)), debug: { raw, url: rawUrl } });
     } catch (error) {
       console.error(error);
       res.status(500).json({
