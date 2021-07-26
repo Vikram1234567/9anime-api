@@ -295,7 +295,7 @@ class BaseController {
       query = query.flat();
 
       if (keyword) query.push(["keyword", keyword]);
-      if (status) query.push(["status", status]);
+      if (status) query.push(["status[]", status]);
       if (sort) query.push(["sort", sort]);
 
       if (!query.length) {
