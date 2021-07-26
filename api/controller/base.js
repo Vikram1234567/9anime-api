@@ -297,6 +297,16 @@ class BaseController {
       if (keyword) query.push(["keyword", keyword]);
       if (status) query.push(["status", status]);
       if (sort) query.push(["sort", sort]);
+
+      if (!query.length) {
+        req.params = {
+          name: "updated_all",
+        };
+        req.query = {
+          page,
+        };
+        return this.browse(req, res);
+      }
       query.push(["page", page]);
 
       const { data } = await this.Agent.get(
