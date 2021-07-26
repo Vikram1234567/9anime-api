@@ -250,15 +250,15 @@ class BaseController {
     try {
       const { id } = req.params;
       const page = req.query.page ?? 1;
-      const { next, results } = await this.filterRequest({
-        "genre[]": id,
-        page,
-      });
+      const { data } = await this.Agent.get(`genre/${id}?page=${page}`);
+      const $ = cheerio.load(data);
 
       res.json({
         success: true,
-        next: next ? `${domain + req.path.substr(1)}?page=${+page + 1}` : null,
-        results,
+        next: !$(".next.disabled").length
+          ? `${domain + req.path.substr(1)}?page=${+page + 1}`
+          : null,
+        results: $(".anime-list > li").toArray().map(parseCard),
       });
     } catch (error) {
       console.error(error);
@@ -309,22 +309,18 @@ class BaseController {
       }
       query.push(["page", page]);
 
-      const { data } = await this.Agent.get(
-        `filter?${new URLSearchParams(query).toString()}`
-      );
-
+      const { next, results } = await this.filterRequest(query);
       query.pop();
       query.push(["page", +page + 1]);
 
-      const $ = cheerio.load(data);
       res.json({
         success: true,
-        next: !$(".next.disabled").length
+        next: next
           ? `${domain + req.path.substr(1)}?${new URLSearchParams(
               query
             ).toString()}`
           : null,
-        results: $(".anime-list > li").toArray().map(parseCard),
+        results,
       });
     } catch (error) {
       console.error(error);
