@@ -164,6 +164,30 @@ class BaseController {
           else return $(e).text().trim();
         });
 
+      const haveRelated = $(".sidebar section").length === 4;
+
+      const parseRelated = (section) => {
+        const parseMiniCard = (c) => {
+          const elem = $(c);
+          const a = elem.find("a");
+          const m = elem.find(".meta").text().trim().split("  ");
+          return {
+            id: a.attr("href").split("/")[2],
+            title: {
+              en: a.text(),
+              jp: a.data("jtitle"),
+            },
+            cover: elem.find("img").attr("src"),
+            episode: m[0],
+            duration: m[1],
+          };
+        };
+
+        return {
+          list: section.find("li").toArray().map(parseMiniCard),
+          more: section.find(".more").attr("href")?.split("=")[1] ?? null,
+        };
+      };
       res.json({
         success: true,
         details: {
@@ -187,6 +211,9 @@ class BaseController {
           duration: meta[8],
           quality: meta[9],
           views: meta[10],
+          related: haveRelated
+            ? parseRelated($(".sidebar section:nth-child(3)"))
+            : null,
         },
         servers: $ep("span")
           .toArray()
