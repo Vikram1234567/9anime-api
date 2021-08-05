@@ -70,7 +70,7 @@ class AuthController {
       const { session } = req.cookies;
       if (!session) throw new Error("Forbidden");
 
-      const { data } = this.Agent.get("user/watchlist", { session });
+      const { data } = await this.Agent.get("user/watchlist", { session });
       const $ = cheerio.load(data);
 
       const list = $(".anime-list-v li")
@@ -79,7 +79,7 @@ class AuthController {
           const elem = $(e);
           const t = elem.find("a");
           return {
-            id: t.attr("src").split("/")[2].split("?")[0],
+            id: t.attr("href").split("/")[2].split("?")[0],
             title: {
               en: t.text(),
               jp: t.data("jtitle"),
