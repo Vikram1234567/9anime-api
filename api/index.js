@@ -4,11 +4,13 @@ const BaseController = require("./controller/base");
 const AuthController = require("./controller/auth");
 
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const app = express();
 const authRoutes = express.Router();
 const port = process.env.PORT || 5000;
 
 app.use(express.json());
+app.use(cookieParser());
 
 Promise.all([Agent.init(), Reqbin.init()]).then(() => {
   const Base = new BaseController(Agent, Reqbin);
@@ -17,9 +19,10 @@ Promise.all([Agent.init(), Reqbin.init()]).then(() => {
   // Auth Router
 
   authRoutes.post("/login", Auth.login.bind(Auth));
-  authRoutes.post("/panel", Auth.panel.bind(Auth));
-  authRoutes.post("/watchlist", Auth.watchlist.bind(Auth));
+  authRoutes.get("/panel", Auth.panel.bind(Auth));
+  authRoutes.get("/watchlist", Auth.watchlist.bind(Auth));
   authRoutes.post("/watchlist-edit", Auth.watchlist_edit.bind(Auth));
+  authRoutes.post("/update", Auth.update.bind(Auth));
 
   // Base
   app.get("/", (req, res) => {

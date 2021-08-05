@@ -47,7 +47,8 @@ class AuthController {
   }
   async panel(req, res) {
     try {
-      const { session } = req.body;
+      console.log(req.cookies);
+      const { session } = req.cookies;
       if (!session) throw new Error("Forbidden");
 
       const { user } = await this.ajaxRequest("panel", session);
@@ -66,7 +67,7 @@ class AuthController {
   }
   async watchlist(req, res) {
     try {
-      const { session } = req.body;
+      const { session } = req.cookies;
       if (!session) throw new Error("Forbidden");
 
       const { data } = this.Agent.get("user/watchlist", { session });
@@ -104,7 +105,12 @@ class AuthController {
   }
   async watchlist_edit(req, res) {
     try {
-      const { id, folder, session } = req.body;
+      const {
+        cookies: { session },
+        body: { id, folder },
+      } = req;
+      if (!session) throw new Error("Forbidden");
+
       const {
         data: {
           error,
@@ -137,6 +143,43 @@ class AuthController {
       const { data } = er.response;
       res.status(500).json(data);
     }
+  }
+  async update(req, res) {
+    try {
+      const {
+        cookies: { session },
+        body,
+      } = req;
+      if (!session) throw new Error("Forbidden");
+
+      const {
+        data: {
+          error,
+          messages: [message],
+        },
+      } = await this.Agent.request(
+        {
+          url: `ajax/user/update`,
+          method: "POST",
+          headers: {
+            "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+          },
+          data: new URLSearchParams(body).toString(),
+        },
+        { session }
+      );
+
+      if (error)
+        return res.status(403).json({
+          success: false,
+          message,
+        });
+
+      res.json({
+        success: true,
+        message,
+      });
+    } catch (error) {}
   }
 }
 
