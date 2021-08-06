@@ -404,6 +404,7 @@ class BaseController {
   async scheduled(req, res) {
     try {
       const { time, ...query } = req.query;
+      if (!time) throw new Error("Missing time argument");
       const { html } = await this.ajaxRequest("home/widget", {
         ...query,
         name: "scheduled",
