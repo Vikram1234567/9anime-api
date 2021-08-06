@@ -17,7 +17,6 @@ Promise.all([Agent.init(), Reqbin.init()]).then(() => {
   const Auth = new AuthController(Agent);
 
   // Auth Router
-
   authRoutes.post("/login", Auth.login.bind(Auth));
   authRoutes.get("/panel", Auth.panel.bind(Auth));
   authRoutes.get("/watchlist", Auth.watchlist.bind(Auth));
@@ -39,6 +38,8 @@ Promise.all([Agent.init(), Reqbin.init()]).then(() => {
   app.get("/anime/:id", Base.anime.bind(Base));
   app.get("/episode/:id", Base.episode.bind(Base));
   app.get("/filter", Base.filter.bind(Base));
+  app.get("/schedule", Base.schedule.bind(Base));
+  app.get("/scheduled", Base.schedule.bind(Base));
   app.use("/user", authRoutes);
   app.use("*", (req, res) => {
     res.status(404).json({

@@ -349,6 +349,94 @@ class BaseController {
       });
     }
   }
+  async schedule(req, res) {
+    try {
+      const { html } = await this.ajaxRequest("home/widget", {
+        ...req.query,
+        name: "schedule",
+      });
+      const $ = cheerio.load(html);
+
+      let current;
+
+      const parseScheduleItem = (e) => {
+        const elem = $(e);
+        const t = elem.find("span");
+        return {
+          id: elem.attr("href").split("/")[2],
+          title: {
+            en: t.text(),
+            jp: t.data("jtitle"),
+          },
+          time: elem.find("time").text(),
+          episode: elem.find("button").text(),
+        };
+      };
+      const parseScheduleDate = (e, i) => {
+        const elem = $(e);
+
+        if (elem.hasClass("active")) current = i;
+
+        return {
+          time: elem.data("time"),
+          day: elem.find("span").text(),
+          date: elem.find("time").text(),
+        };
+      };
+
+      const days = $(".day").toArray().map(parseScheduleDate);
+      const list = $(".scheduled > a").toArray().map(parseScheduleItem);
+
+      res.json({
+        success: true,
+        current,
+        days: days,
+        list,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: error.toString(),
+      });
+    }
+  }
+  async scheduled(req, res) {
+    try {
+      const { time, ...query } = req.query;
+      const { html } = await this.ajaxRequest("home/widget", {
+        ...query,
+        name: "scheduled",
+        time,
+      });
+      const $ = cheerio.load(html);
+      const parseScheduleItem = (e) => {
+        const elem = $(e);
+        const t = elem.find("span");
+        return {
+          id: elem.attr("href").split("/")[2],
+          title: {
+            en: t.text(),
+            jp: t.data("jtitle"),
+          },
+          time: elem.find("time").text(),
+          episode: elem.find("button").text(),
+        };
+      };
+      const list = $("a").toArray().map(parseScheduleItem);
+
+      res.json({
+        success: true,
+        list,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: error.toString(),
+      });
+    }
+  }
 }
 
 module.exports = BaseController;
