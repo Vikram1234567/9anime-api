@@ -47,7 +47,7 @@ class BaseController {
     );
     const $ = cheerio.load(data);
     return {
-      next: $(".next").length && !$(".next.disable").length,
+      next: $(".next").length && !$(".next.disabled").length,
       results: $(".anime-list > li").toArray().map(parseCard),
     };
   };
