@@ -137,7 +137,7 @@ class BaseController {
       });
     }
   }
-  async anime(req, res) {
+  async watch(req, res) {
     try {
       const { id } = req.params;
       const [{ data }, { html }] = await Promise.all([

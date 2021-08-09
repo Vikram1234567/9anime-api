@@ -35,7 +35,7 @@ Promise.all([Agent.init(), Reqbin.init()]).then(() => {
   app.get("/browse/:name", Base.browse.bind(Base));
   app.get("/search/:query", Base.search.bind(Base));
   app.get("/genre/:id", Base.genre.bind(Base));
-  app.get("/anime/:id", Base.anime.bind(Base));
+  app.get("/watch/:id", Base.watch.bind(Base));
   app.get("/episode/:id", Base.episode.bind(Base));
   app.get("/filter", Base.filter.bind(Base));
   app.get("/schedule", Base.schedule.bind(Base));
