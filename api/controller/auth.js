@@ -5,8 +5,8 @@ class AuthController {
     this.Agent = agent;
   }
 
-  ajaxRequest = async (path, session) => {
-    const { data } = await this.Agent.get(`ajax/user/${path}`, { session });
+  ajaxRequest = async (path, cookies) => {
+    const { data } = await this.Agent.get(`ajax/user/${path}`, { ...cookies });
     return data;
   };
 
@@ -34,9 +34,14 @@ class AuthController {
           message,
         });
 
+      const token = headers["set-cookie"][1].split(";")[0].split("=");
+
       res.json({
         success: true,
-        session: headers["set-cookie"][0].slice(8).split(";")[0],
+        token: {
+          key: token[0],
+          value: token[1],
+        },
         message,
       });
     } catch (er) {
@@ -47,11 +52,10 @@ class AuthController {
   }
   async panel(req, res) {
     try {
-      console.log(req.cookies);
-      const { session } = req.cookies;
-      if (!session) throw new Error("Forbidden");
+      const cookies = req.cookies;
+      if (!cookies) throw new Error("Forbidden");
 
-      const { user } = await this.ajaxRequest("panel", session);
+      const { user } = await this.ajaxRequest("panel", cookies);
       if (!user) throw new Error("Forbidden");
       res.json({
         success: true,
@@ -67,10 +71,10 @@ class AuthController {
   }
   async watchlist(req, res) {
     try {
-      const { session } = req.cookies;
-      if (!session) throw new Error("Forbidden");
+      const cookies = req.cookies;
+      if (!cookies) throw new Error("Forbidden");
 
-      const { data } = await this.Agent.get("user/watchlist", { session });
+      const { data } = await this.Agent.get("user/watchlist", cookies);
       const $ = cheerio.load(data);
 
       const list = $(".anime-list-v li")
@@ -106,10 +110,10 @@ class AuthController {
   async watchlist_edit(req, res) {
     try {
       const {
-        cookies: { session },
+        cookies,
         body: { id, folder },
       } = req;
-      if (!session) throw new Error("Forbidden");
+      if (!cookies) throw new Error("Forbidden");
 
       const {
         data: {
@@ -125,7 +129,7 @@ class AuthController {
           },
           data: `id=${id}&folder=${folder}`,
         },
-        { session }
+        cookies
       );
 
       if (error)
@@ -146,11 +150,8 @@ class AuthController {
   }
   async update(req, res) {
     try {
-      const {
-        cookies: { session },
-        body,
-      } = req;
-      if (!session) throw new Error("Forbidden");
+      const { cookies, body } = req;
+      if (!cookies) throw new Error("Forbidden");
 
       const {
         data: {
@@ -166,7 +167,7 @@ class AuthController {
           },
           data: new URLSearchParams(body).toString(),
         },
-        { session }
+        cookies
       );
 
       if (error)
