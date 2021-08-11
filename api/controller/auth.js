@@ -59,6 +59,7 @@ class AuthController {
         data: {
           error,
           messages: [message],
+          headers,
         },
       } = await this.Agent.request({
         url: "ajax/user/register",
@@ -81,8 +82,14 @@ class AuthController {
           message,
         });
 
+      const token = headers["set-cookie"][1].split(";")[0].split("=");
+
       res.json({
         success: true,
+        token: {
+          key: token[0],
+          value: token[1],
+        },
         message,
       });
     } catch (error) {
