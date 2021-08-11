@@ -141,7 +141,7 @@ class AuthController {
 
       if (!cookies) throw new Error("Forbidden");
 
-      if (!token) {
+      if (!_token) {
         const { data } = await this.Agent.get("user/delete", cookies);
         const $ = cheerio.load(data);
         const token = $(`input[name="_token"]`).attr("value");
