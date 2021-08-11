@@ -6,7 +6,7 @@ class AuthController {
   }
 
   ajaxRequest = async (path, cookies) => {
-    const { data } = await this.Agent.get(`ajax/user/${path}`, { ...cookies });
+    const { data } = await this.Agent.get(`ajax/user/${path}`, cookies);
     return data;
   };
 
@@ -48,6 +48,134 @@ class AuthController {
       console.error(er);
       const { data } = er.response;
       res.status(500).json(data);
+    }
+  }
+  async register(req, res) {
+    try {
+      const { username, email, password, password_confirmation, captcha } =
+        req.body;
+
+      const {
+        data: {
+          error,
+          messages: [message],
+        },
+      } = await this.Agent.request({
+        url: "ajax/user/register",
+        headers: {
+          "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+        },
+        data: new URLSearchParams({
+          username,
+          email,
+          password,
+          password_confirmation,
+          "g-recaptcha-response": captcha,
+        }).toString(),
+        method: "POST",
+      });
+
+      if (error)
+        return res.status(403).json({
+          success: false,
+          message,
+        });
+
+      res.json({
+        success: true,
+        message,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: error.toString(),
+      });
+    }
+  }
+  async forgot_password(req, res) {
+    try {
+      const { identifier, captcha } = req.body;
+
+      const {
+        data: {
+          error,
+          messages: [message],
+        },
+      } = await this.Agent.request({
+        url: "ajax/user/forgot-password",
+        headers: {
+          "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+        },
+        data: new URLSearchParams({
+          identifier,
+          "g-recaptcha-response": captcha,
+        }).toString(),
+        method: "POST",
+      });
+
+      if (error)
+        return res.status(403).json({
+          success: false,
+          message,
+        });
+
+      res.json({
+        success: true,
+        message,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: error.toString(),
+      });
+    }
+  }
+  async delete(req, res) {
+    try {
+      const {
+        cookies,
+        body: { _token, confirm },
+      } = req;
+
+      if (!cookies) throw new Error("Forbidden");
+
+      if (!token) {
+        const { data } = await this.Agent.get("user/delete", cookies);
+        const $ = cheerio.load(data);
+        const token = $(`input[name="_token"]`).attr("value");
+
+        res.json({ success: true, token });
+      } else {
+        const { data, status } = await this.Agent.request({
+          url: "user/delete",
+          headers: {
+            "content-type": "application/x-www-form-urlencoded",
+          },
+          method: "POST",
+          data: new URLSearchParams({ _token, confirm }).toString(),
+        });
+
+        if (status === 200) {
+          const $ = cheerio.load(data);
+          return res.status(403).json({
+            success: false,
+            message: $(".alert").text().trim(),
+          });
+        }
+
+        res.json({
+          success: true,
+          message: "Account deleted",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
     }
   }
   async panel(req, res) {
