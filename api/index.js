@@ -18,6 +18,9 @@ Promise.all([Agent.init(), Reqbin.init()]).then(() => {
 
   // Auth Router
   authRoutes.post("/login", Auth.login.bind(Auth));
+  authRoutes.post("/register", Auth.update.bind(Auth));
+  authRoutes.post("/forgot-password", Auth.update.bind(Auth));
+  authRoutes.use("/delete", Auth.delete.bind(Auth));
   authRoutes.get("/panel", Auth.panel.bind(Auth));
   authRoutes.get("/watchlist", Auth.watchlist.bind(Auth));
   authRoutes.post("/watchlist-edit", Auth.watchlist_edit.bind(Auth));
