@@ -13,7 +13,6 @@ class AuthController {
   async login(req, res) {
     try {
       const { username, password } = req.body;
-      console.log(req.body);
       const {
         data: {
           error,
@@ -55,7 +54,6 @@ class AuthController {
     try {
       const { username, email, password, password_confirmation, captcha } =
         req.body;
-      console.log(req.body);
 
       const {
         data: {
@@ -105,7 +103,6 @@ class AuthController {
   async forgot_password(req, res) {
     try {
       const { identifier, captcha } = req.body;
-      console.log(req.body);
 
       const {
         data: {
