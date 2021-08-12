@@ -5,8 +5,10 @@ class AuthController {
     this.Agent = agent;
   }
 
-  ajaxRequest = async (path, cookies) => {
-    const { data } = await this.Agent.get(`ajax/user/${path}`, cookies);
+  ajaxRequest = async (path, token) => {
+    const { data } = await this.Agent.get(`ajax/user/${path}`, {
+      remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d: token,
+    });
     return data;
   };
 
@@ -34,14 +36,11 @@ class AuthController {
           message,
         });
 
-      const token = headers["set-cookie"][1].split(";")[0].split("=");
+      const token = headers["set-cookie"][1].split(";")[0].split("=")[1];
 
       res.json({
         success: true,
-        token: {
-          key: token[0],
-          value: token[1],
-        },
+        token,
         message,
       });
     } catch (er) {
@@ -82,14 +81,11 @@ class AuthController {
           message,
         });
 
-      const token = headers["set-cookie"][1].split(";")[0].split("=");
+      const token = headers["set-cookie"][1].split(";")[0].split("=")[1];
 
       res.json({
         success: true,
-        token: {
-          key: token[0],
-          value: token[1],
-        },
+        token,
         message,
       });
     } catch (error) {
@@ -142,27 +138,32 @@ class AuthController {
   async delete(req, res) {
     try {
       const {
-        cookies,
+        cookies: { token },
         body: { _token, confirm },
       } = req;
 
-      if (!cookies) throw new Error("Forbidden");
+      if (!token) throw new Error("Forbidden");
 
       if (!_token) {
-        const { data } = await this.Agent.get("user/delete", cookies);
+        const { data } = await this.Agent.get("user/delete", {
+          remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d: token,
+        });
         const $ = cheerio.load(data);
         const token = $(`input[name="_token"]`).attr("value");
 
         res.json({ success: true, token });
       } else {
-        const { data, status } = await this.Agent.request({
-          url: "user/delete",
-          headers: {
-            "content-type": "application/x-www-form-urlencoded",
+        const { data, status } = await this.Agent.request(
+          {
+            url: "user/delete",
+            headers: {
+              "content-type": "application/x-www-form-urlencoded",
+            },
+            method: "POST",
+            data: new URLSearchParams({ _token, confirm }).toString(),
           },
-          method: "POST",
-          data: new URLSearchParams({ _token, confirm }).toString(),
-        });
+          { remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d: token }
+        );
 
         if (status === 200) {
           const $ = cheerio.load(data);
@@ -187,10 +188,10 @@ class AuthController {
   }
   async panel(req, res) {
     try {
-      const cookies = req.cookies;
-      if (!cookies) throw new Error("Forbidden");
+      const { token } = req.cookies;
+      if (!token) throw new Error("Forbidden");
 
-      const { user } = await this.ajaxRequest("panel", cookies);
+      const { user } = await this.ajaxRequest("panel", token);
       if (!user) throw new Error("Forbidden");
       res.json({
         success: true,
@@ -206,10 +207,12 @@ class AuthController {
   }
   async watchlist(req, res) {
     try {
-      const cookies = req.cookies;
-      if (!cookies) throw new Error("Forbidden");
+      const { token } = req.cookies;
+      if (!token) throw new Error("Forbidden");
 
-      const { data } = await this.Agent.get("user/watchlist", cookies);
+      const { data } = await this.Agent.get("user/watchlist", {
+        remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d: token,
+      });
       const $ = cheerio.load(data);
 
       const list = $(".anime-list-v li")
@@ -245,10 +248,10 @@ class AuthController {
   async watchlist_edit(req, res) {
     try {
       const {
-        cookies,
+        cookies: { token },
         body: { id, folder },
       } = req;
-      if (!cookies) throw new Error("Forbidden");
+      if (!token) throw new Error("Forbidden");
 
       const {
         data: {
@@ -264,7 +267,7 @@ class AuthController {
           },
           data: `id=${id}&folder=${folder}`,
         },
-        cookies
+        { remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d: token }
       );
 
       if (error)
@@ -285,8 +288,11 @@ class AuthController {
   }
   async update(req, res) {
     try {
-      const { cookies, body } = req;
-      if (!cookies) throw new Error("Forbidden");
+      const {
+        cookies: { token },
+        body,
+      } = req;
+      if (!token) throw new Error("Forbidden");
 
       const {
         data: {
@@ -302,7 +308,7 @@ class AuthController {
           },
           data: new URLSearchParams(body).toString(),
         },
-        cookies
+        { remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d: token }
       );
 
       if (error)
@@ -315,7 +321,11 @@ class AuthController {
         success: true,
         message,
       });
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+      const { data } = error.response;
+      res.status(500).json(data);
+    }
   }
 }
 
