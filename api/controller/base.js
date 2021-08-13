@@ -52,7 +52,7 @@ class BaseController {
     };
   };
 
-  async home(req, res) {
+  home = async (req, res) => {
     try {
       const { data } = await this.Agent.get("home");
       const $ = cheerio.load(data);
@@ -90,8 +90,8 @@ class BaseController {
         message: error.toString(),
       });
     }
-  }
-  async browse(req, res) {
+  };
+  browse = async (req, res) => {
     try {
       const { name } = req.params;
       const page = req.query.page ?? 1;
@@ -114,8 +114,8 @@ class BaseController {
         message: error.toString(),
       });
     }
-  }
-  async search(req, res) {
+  };
+  search = async (req, res) => {
     try {
       const { query } = req.params;
       const page = req.query.page ?? 1;
@@ -136,8 +136,8 @@ class BaseController {
         message: error.toString(),
       });
     }
-  }
-  async watch(req, res) {
+  };
+  watch = async (req, res) => {
     try {
       const { id } = req.params;
       const [{ data }, { html }] = await Promise.all([
@@ -243,8 +243,8 @@ class BaseController {
         message: error.toString(),
       });
     }
-  }
-  async episode(req, res) {
+  };
+  episode = async (req, res) => {
     let rawUrl, raw;
     try {
       const { id } = req.params;
@@ -264,8 +264,8 @@ class BaseController {
         debug: { raw, url: rawUrl },
       });
     }
-  }
-  async genre(req, res) {
+  };
+  genre = async (req, res) => {
     try {
       const { id } = req.params;
       const page = req.query.page ?? 1;
@@ -286,8 +286,8 @@ class BaseController {
         message: error.toString(),
       });
     }
-  }
-  async filter(req, res) {
+  };
+  filter = async (req, res) => {
     try {
       let {
         genre,
@@ -348,8 +348,8 @@ class BaseController {
         message: error.toString(),
       });
     }
-  }
-  async schedule(req, res) {
+  };
+  schedule = async (req, res) => {
     try {
       const { data } = await this.Agent.get(
         `schedule?${new URLSearchParams(req.query)}`
@@ -400,7 +400,7 @@ class BaseController {
         message: error.toString(),
       });
     }
-  }
+  };
 }
 
 module.exports = BaseController;

@@ -12,7 +12,7 @@ class AuthController {
     return data;
   };
 
-  async login(req, res) {
+  login = async (req, res) => {
     try {
       const { username, password } = req.body;
       const {
@@ -48,8 +48,8 @@ class AuthController {
       const { data } = er.response;
       res.status(500).json(data);
     }
-  }
-  async register(req, res) {
+  };
+  register = async (req, res) => {
     try {
       const { username, email, password, password_confirmation, captcha } =
         req.body;
@@ -95,8 +95,8 @@ class AuthController {
         message: error.toString(),
       });
     }
-  }
-  async forgot_password(req, res) {
+  };
+  forgot_password = async (req, res) => {
     try {
       const { identifier, captcha } = req.body;
 
@@ -134,8 +134,8 @@ class AuthController {
         message: error.toString(),
       });
     }
-  }
-  async delete(req, res) {
+  };
+  delete = async (req, res) => {
     try {
       const {
         cookies: { token },
@@ -185,8 +185,8 @@ class AuthController {
         message: "Forbidden",
       });
     }
-  }
-  async panel(req, res) {
+  };
+  panel = async (req, res) => {
     try {
       const { token } = req.cookies;
       if (!token) throw new Error("Forbidden");
@@ -204,8 +204,8 @@ class AuthController {
         message: "Forbidden",
       });
     }
-  }
-  async watchlist(req, res) {
+  };
+  watchlist = async (req, res) => {
     try {
       const { token } = req.cookies;
       if (!token) throw new Error("Forbidden");
@@ -244,8 +244,8 @@ class AuthController {
         message: "Forbidden",
       });
     }
-  }
-  async watchlist_edit(req, res) {
+  };
+  watchlist_edit = async (req, res) => {
     try {
       const {
         cookies: { token },
@@ -285,8 +285,8 @@ class AuthController {
       const { data } = er.response;
       res.status(500).json(data);
     }
-  }
-  async update(req, res) {
+  };
+  update = async (req, res) => {
     try {
       const {
         cookies: { token },
@@ -326,7 +326,7 @@ class AuthController {
       const { data } = error.response;
       res.status(500).json(data);
     }
-  }
+  };
 }
 
 module.exports = AuthController;
