@@ -3,6 +3,7 @@ const cheerio = require("cheerio");
 class AuthController {
   constructor(agent) {
     this.Agent = agent;
+    this.sessionCache = new Map();
   }
 
   ajaxRequest = async (path, token) => {
@@ -58,8 +59,8 @@ class AuthController {
         data: {
           error,
           messages: [message],
-          headers,
         },
+        headers,
       } = await this.Agent.request({
         url: "ajax/user/register",
         headers: {
@@ -145,14 +146,23 @@ class AuthController {
       if (!token) throw new Error("Forbidden");
 
       if (!_token) {
-        const { data } = await this.Agent.get("user/delete", {
+        const { data, headers } = await this.Agent.get("user/delete", {
           remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d: token,
         });
+
+        this.sessionCache.set(
+          token,
+          headers["set-cookie"][0].split(";")[0].split("=")[1]
+        );
+
         const $ = cheerio.load(data);
         const deleteToken = $(`input[name="_token"]`).attr("value");
 
         res.json({ success: true, token: deleteToken });
       } else {
+        const session = this.sessionCache.get(token);
+        if (!session) throw new Error("Forbidden");
+
         const { data, status } = await this.Agent.request(
           {
             url: "user/delete",
@@ -162,7 +172,10 @@ class AuthController {
             method: "POST",
             data: new URLSearchParams({ _token, confirm }).toString(),
           },
-          { remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d: token }
+          {
+            remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d: token,
+            session,
+          }
         );
 
         if (status === 200) {
