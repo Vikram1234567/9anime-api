@@ -156,7 +156,7 @@ class AuthController {
         );
 
         const $ = cheerio.load(data);
-        const deleteToken = $(`input[name="_token"]`).attr("value");
+        const deleteToken = $(`input[name="_token"]`).val();
 
         res.json({ success: true, token: deleteToken });
       } else {
@@ -191,6 +191,31 @@ class AuthController {
           message: "Account deleted",
         });
       }
+    } catch (error) {
+      console.error(error);
+      res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+  }
+  async profile(req, res) {
+    try {
+      const { token } = req.cookies;
+      if (!token) throw new Error("Forbidden");
+
+      const { data } = await this.Agent.get("user/profile", {
+        remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d: token,
+      });
+      const $ = cheerio.load(data);
+
+      res.json({
+        success: true,
+        user: {
+          username: $('input[name="username"]').val(),
+          email: $('input[placeholder="Email"]').val(),
+        },
+      });
     } catch (error) {
       console.error(error);
       res.status(403).json({
@@ -243,7 +268,7 @@ class AuthController {
             episode: elem.find(".ep").text(),
             folder: elem.find(".folder span").text(),
             bookmarked: elem.find(".bookmarked").text().trim(),
-            watchstatus: elem.find(".watchstatus").data("value"),
+            watchstatus: elem.find(".watchstatus").val(),
           };
         });
       res.json({
