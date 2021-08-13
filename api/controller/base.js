@@ -371,25 +371,27 @@ class BaseController {
           episode: elem.find(".ep").text(),
         };
       };
-      const parseSchedule = (e, i) => {
+      const parseSchedule = (e) =>
+        $(e).find(".item").toArray().map(parseScheduleItem);
+      const parseDay = (e, i) => {
         const elem = $(e);
 
         if (elem.hasClass("active")) current = i;
 
         return {
-          day: {
-            number: elem.find(".nday").text(),
-            text: elem.find(".wday").text(),
-          },
-          list: elem.siblings().find(".item").toArray().map(parseScheduleItem),
+          number: elem.find(".nday").text(),
+          text: elem.find(".wday").text(),
         };
       };
 
-      const schedules = $(".heading").toArray().map(parseSchedule);
+      const days = $(".heading").toArray().map(parseDay);
+
       res.json({
         success: true,
         current,
-        schedules,
+        month: $(".current").text(),
+        days,
+        schedules: $(".items").toArray().map(parseSchedule),
       });
     } catch (error) {
       console.error(error);
