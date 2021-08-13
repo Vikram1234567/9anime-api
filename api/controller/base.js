@@ -351,84 +351,45 @@ class BaseController {
   }
   async schedule(req, res) {
     try {
-      const { html } = await this.ajaxRequest("home/widget", {
-        ...req.query,
-        name: "schedule",
-      });
-      const $ = cheerio.load(html);
+      const { data } = await this.Agent.get(
+        `schedule?${new URLSearchParams(req.query)}`
+      );
+      const $ = cheerio.load(data);
 
       let current;
 
       const parseScheduleItem = (e) => {
         const elem = $(e);
-        const t = elem.find("span");
+        const t = elem.find("div").first();
         return {
-          id: elem.attr("href").split("/")[2],
+          id: elem.find("a").attr("href").split("/")[4],
           title: {
             en: t.text(),
             jp: t.data("jtitle"),
           },
           time: elem.find("time").text(),
-          episode: elem.find("button").text(),
+          episode: elem.find(".ep").text(),
         };
       };
-      const parseScheduleDate = (e, i) => {
+      const parseSchedule = (e, i) => {
         const elem = $(e);
 
         if (elem.hasClass("active")) current = i;
 
         return {
-          time: elem.data("time"),
-          day: elem.find("span").text(),
-          date: elem.find("time").text(),
+          day: {
+            number: elem.find(".nday").text(),
+            text: elem.find(".wday").text(),
+          },
+          list: elem.siblings().find(".item").toArray().map(parseScheduleItem),
         };
       };
 
-      const days = $(".day").toArray().map(parseScheduleDate);
-      const list = $(".scheduled > a").toArray().map(parseScheduleItem);
-
+      const schedules = $(".heading").toArray().map(parseSchedule);
       res.json({
         success: true,
         current,
-        days: days,
-        list,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        success: false,
-        message: error.toString(),
-      });
-    }
-  }
-  async scheduled(req, res) {
-    try {
-      const { time, ...query } = req.query;
-      if (!time) throw new Error("Missing time argument");
-      const { html } = await this.ajaxRequest("home/widget", {
-        ...query,
-        name: "scheduled",
-        time,
-      });
-      const $ = cheerio.load(html);
-      const parseScheduleItem = (e) => {
-        const elem = $(e);
-        const t = elem.find("span");
-        return {
-          id: elem.attr("href").split("/")[2],
-          title: {
-            en: t.text(),
-            jp: t.data("jtitle"),
-          },
-          time: elem.find("time").text(),
-          episode: elem.find("button").text(),
-        };
-      };
-      const list = $("a").toArray().map(parseScheduleItem);
-
-      res.json({
-        success: true,
-        list,
+        schedules,
       });
     } catch (error) {
       console.error(error);
