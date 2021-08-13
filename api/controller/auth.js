@@ -149,9 +149,9 @@ class AuthController {
           remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d: token,
         });
         const $ = cheerio.load(data);
-        const token = $(`input[name="_token"]`).attr("value");
+        const deleteToken = $(`input[name="_token"]`).attr("value");
 
-        res.json({ success: true, token });
+        res.json({ success: true, token: deleteToken });
       } else {
         const { data, status } = await this.Agent.request(
           {
