@@ -357,6 +357,7 @@ class BaseController {
       const $ = cheerio.load(data);
 
       let current;
+      const month = $(".current").text().split(" ")[0];
 
       const parseScheduleItem = (e) => {
         const elem = $(e);
@@ -379,8 +380,9 @@ class BaseController {
         if (elem.hasClass("active")) current = i;
 
         return {
-          number: elem.find(".nday").text(),
-          text: elem.find(".wday").text(),
+          index: i,
+          day: elem.find(".wday").text().substr(0, 3).toUpperCase(),
+          date: `${month} ${elem.find(".nday").text()}`,
         };
       };
 
@@ -389,7 +391,6 @@ class BaseController {
       res.json({
         success: true,
         current,
-        month: $(".current").text(),
         days,
         schedules: $(".items").toArray().map(parseSchedule),
       });
