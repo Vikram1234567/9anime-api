@@ -17,14 +17,14 @@ Promise.all([Agent.init(), Reqbin.init()]).then(() => {
   const Auth = new AuthController(Agent);
 
   // Auth Router
-  authRoutes.post("/login", Auth.login);
-  authRoutes.post("/register", Auth.register);
-  authRoutes.post("/forgot-password", Auth.forgot_password);
-  authRoutes.use("/delete", Auth.delete);
-  authRoutes.get("/panel", Auth.panel);
-  authRoutes.get("/watchlist", Auth.watchlist);
-  authRoutes.post("/watchlist-edit", Auth.watchlist_edit);
-  authRoutes.post("/update", Auth.update);
+  authRoutes.post("/login", Auth.login.bind(Auth));
+  authRoutes.post("/register", Auth.register.bind(Auth));
+  authRoutes.post("/forgot-password", Auth.forgot_password.bind(Auth));
+  authRoutes.use("/delete", Auth.delete.bind(Auth));
+  authRoutes.get("/panel", Auth.panel.bind(Auth));
+  authRoutes.get("/watchlist", Auth.watchlist.bind(Auth));
+  authRoutes.post("/watchlist-edit", Auth.watchlist_edit.bind(Auth));
+  authRoutes.post("/update", Auth.update.bind(Auth));
 
   // Base
   app.get("/", (req, res) => {
@@ -34,14 +34,14 @@ Promise.all([Agent.init(), Reqbin.init()]).then(() => {
     });
   });
 
-  app.get("/home", Base.home);
-  app.get("/browse/:name", Base.browse);
-  app.get("/search/:query", Base.search);
-  app.get("/genre/:id", Base.genre);
-  app.get("/watch/:id", Base.watch);
-  app.get("/episode/:id", Base.episode);
-  app.get("/filter", Base.filter);
-  app.get("/schedule", Base.schedule);
+  app.get("/home", Base.home.bind(Base));
+  app.get("/browse/:name", Base.browse.bind(Base));
+  app.get("/search/:query", Base.search.bind(Base));
+  app.get("/genre/:id", Base.genre.bind(Base));
+  app.get("/watch/:id", Base.watch.bind(Base));
+  app.get("/episode/:id", Base.episode.bind(Base));
+  app.get("/filter", Base.filter.bind(Base));
+  app.get("/schedule", Base.schedule.bind(Base));
   app.use("/user", authRoutes);
   app.use("*", (req, res) => {
     res.status(404).json({
