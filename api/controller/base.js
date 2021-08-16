@@ -2,6 +2,8 @@ const cheerio = require("cheerio");
 const getVideo = require("../client/getVideo");
 const domain = process.env.DOMAIN ?? "http://localhost:5000/";
 
+const verified = "IbidsynWkw1Z52zg53lQZg==";
+
 const parseCard = (e) => {
   const elem = cheerio.default(e);
   const splitUrl = elem.find("a").first().attr("href").split("/");
@@ -155,6 +157,7 @@ class BaseController {
         this.Agent.get(`watch/${id}`),
         this.ajaxRequest(`anime/servers`, {
           id: id.split(".").pop(),
+          verified,
         }),
       ]);
       const $ = cheerio.load(data);
