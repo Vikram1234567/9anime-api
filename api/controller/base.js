@@ -2,7 +2,55 @@ const cheerio = require("cheerio");
 const getVideo = require("../client/getVideo");
 const domain = process.env.DOMAIN ?? "http://localhost:5000/";
 
-const verified = "IbidsynWkw1Z52zg53lQZg==";
+const btoa = (data) => Buffer.from(data, "binary").toString("base64");
+const atob = (data) => Buffer.from(data, "base64").toString("binary");
+function randomString(length) {
+  var mask = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  var result = "";
+  for (var i = length; i > 0; --i)
+    result += mask[Math.floor(Math.random() * mask.length)];
+  return result;
+}
+const decrypt = (data) => {
+  const t = data.slice(0, 16),
+    n = atob(data.slice(16));
+
+  for (var i, r = [], u = 0, x = "", e = 256, o = 0; o < e; o += 1) r[o] = o; /// make array of 256 number
+  for (o = 0; o < e; o += 1) {
+    u = (u + r[o] + t.charCodeAt(o % t.length)) % e;
+    i = r[o];
+    r[o] = r[u];
+    r[u] = i;
+  }
+  for (var c = (u = o = 0); c < n.length; c += 1) {
+    u = (u + r[(o = (o + c) % e)]) % e;
+    i = r[o];
+    r[o] = r[u];
+    r[u] = i;
+    x += String.fromCharCode(n.charCodeAt(c) ^ r[(r[o] + r[u]) % e]);
+  }
+  return x;
+};
+const encrypt = (data) => {
+  const t = randomString(16),
+    n = data;
+
+  for (var i, r = [], u = 0, x = "", e = 256, o = 0; o < e; o += 1) r[o] = o; /// make array of 256 number
+  for (o = 0; o < e; o += 1) {
+    u = (u + r[o] + t.charCodeAt(o % t.length)) % e;
+    i = r[o];
+    r[o] = r[u];
+    r[u] = i;
+  }
+  for (var c = (u = o = 0); c < n.length; c += 1) {
+    u = (u + r[(o = (o + c) % e)]) % e;
+    i = r[o];
+    r[o] = r[u];
+    r[u] = i;
+    x += String.fromCharCode(n.charCodeAt(c) ^ r[(r[o] + r[u]) % e]);
+  }
+  return t + btoa(x);
+};
 
 const parseCard = (e) => {
   const elem = cheerio.default(e);
@@ -21,25 +69,6 @@ const parseCard = (e) => {
     episode: elem.find(".ep").text(),
     dub: !!elem.find(".dub").length,
   };
-};
-const atob = (data) => Buffer.from(data, "base64").toString("binary");
-const decryptURL = (url) => {
-  const t = url.slice(0, 16),
-    n = atob(url.slice(16));
-
-  for (var i, r = [], u = 0, x = "", e = 256, o = 0; o < e; o += 1) r[o] = o;
-  for (o = 0; o < e; o += 1)
-    (u = (u + r[o] + t.charCodeAt(o % t.length)) % e),
-      (i = r[o]),
-      (r[o] = r[u]),
-      (r[u] = i);
-  for (var c = (u = o = 0); c < n.length; c += 1)
-    (u = (u + r[(o = (o + c) % e)]) % e),
-      (i = r[o]),
-      (r[o] = r[u]),
-      (r[u] = i),
-      (x += String.fromCharCode(n.charCodeAt(c) ^ r[(r[o] + r[u]) % e]));
-  return x;
 };
 
 class BaseController {
@@ -157,7 +186,7 @@ class BaseController {
         this.Agent.get(`watch/${id}`),
         this.ajaxRequest(`anime/servers`, {
           id: id.split(".").pop(),
-          verified,
+          verified: encrypt(id.split(".").pop()),
         }),
       ]);
       const $ = cheerio.load(data);
@@ -265,7 +294,7 @@ class BaseController {
       const { url } = await this.Reqbin.fetchEpisode(id);
       if (!url) throw new Error("Data not found");
 
-      const decrypted = decryptURL(url);
+      const decrypted = decrypt(url);
       raw = url;
       rawUrl = decrypted;
 
