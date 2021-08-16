@@ -1,5 +1,4 @@
 const cheerio = require("cheerio");
-const CryptoJS = require("crypto-js");
 const getVideo = require("../client/getVideo");
 const domain = process.env.DOMAIN ?? "http://localhost:5000/";
 
@@ -21,12 +20,24 @@ const parseCard = (e) => {
     dub: !!elem.find(".dub").length,
   };
 };
+const atob = (data) => Buffer.from(data, "base64").toString("binary");
 const decryptURL = (url) => {
-  const key = CryptoJS.enc.Utf8.parse(url.slice(0, 9));
-  const encrypted = CryptoJS.enc.Base64.parse(url.slice(9));
-  return CryptoJS.RC4.decrypt({ ciphertext: encrypted }, key).toString(
-    CryptoJS.enc.Utf8
-  );
+  const t = url.slice(0, 16),
+    n = atob(url.slice(16));
+
+  for (var i, r = [], u = 0, x = "", e = 256, o = 0; o < e; o += 1) r[o] = o;
+  for (o = 0; o < e; o += 1)
+    (u = (u + r[o] + t.charCodeAt(o % t.length)) % e),
+      (i = r[o]),
+      (r[o] = r[u]),
+      (r[u] = i);
+  for (var c = (u = o = 0); c < n.length; c += 1)
+    (u = (u + r[(o = (o + c) % e)]) % e),
+      (i = r[o]),
+      (r[o] = r[u]),
+      (r[u] = i),
+      (x += String.fromCharCode(n.charCodeAt(c) ^ r[(r[o] + r[u]) % e]));
+  return x;
 };
 
 class BaseController {
