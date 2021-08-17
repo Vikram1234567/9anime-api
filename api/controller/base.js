@@ -1,5 +1,5 @@
 const cheerio = require("cheerio");
-const getVideo = require("../client/getVideo");
+const getVideo = require("../../temp/getVideo");
 const domain = process.env.DOMAIN ?? "http://localhost:5000/";
 
 const btoa = (data) => Buffer.from(data, "binary").toString("base64");
@@ -298,7 +298,7 @@ class BaseController {
       raw = url;
       rawUrl = decrypted;
 
-      res.json({ ...(await getVideo(decrypted)), debug: { raw, url: rawUrl } });
+      res.json({ success: true, url: decrypted });
     } catch (error) {
       console.error(error);
       res.status(500).json({
