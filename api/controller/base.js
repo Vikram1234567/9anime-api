@@ -1,5 +1,4 @@
 const cheerio = require("cheerio");
-const getVideo = require("../../temp/getVideo");
 const domain = process.env.DOMAIN ?? "http://localhost:5000/";
 
 const btoa = (data) => Buffer.from(data, "binary").toString("base64");
