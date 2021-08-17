@@ -163,7 +163,12 @@ class AuthController {
         const session = this.sessionCache.get(token);
         if (!session) throw new Error("Forbidden");
 
-        const { data, status } = await this.Agent.request(
+        const {
+          data,
+          request: {
+            res: { responseUrl },
+          },
+        } = await this.Agent.request(
           {
             url: "user/delete",
             headers: {
@@ -178,7 +183,7 @@ class AuthController {
           }
         );
 
-        if (status === 200) {
+        if (responseUrl.includes("user/delete")) {
           const $ = cheerio.load(data);
           return res.status(403).json({
             success: false,
