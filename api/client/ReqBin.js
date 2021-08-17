@@ -49,8 +49,13 @@ const getWaf = (data) => {
 
 class ReqBin {
   async init() {
-    const data = await ReqbinRequest("");
+    let data = await ReqbinRequest("");
     this.waf_cv = getWaf(data);
+
+    setInterval(async () => {
+      data = await ReqbinRequest("");
+      this.waf_cv = getWaf(data);
+    }, 8642000);
   }
   async fetchEpisode(id) {
     const data = await ReqbinRequest(

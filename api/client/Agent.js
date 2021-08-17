@@ -42,6 +42,10 @@ class Agent {
   async init() {
     this.domain = process.env.DOMAIN ? "to" : "pw";
     this.waf_cv = await getWaf(this.domain);
+
+    setInterval(async () => {
+      this.waf_cv = await getWaf(this.domain);
+    }, 8642000);
   }
   async get(path, cookie = {}) {
     return await requestAgent(
