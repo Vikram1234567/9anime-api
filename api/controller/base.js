@@ -61,10 +61,10 @@ const parseCard = (e) => {
     id: (splitUrl[4] ?? splitUrl[2]).split("?")[0],
     title: {
       en: t.text(),
-      jp: t.data("jtitle"),
+      jp: t.data("jtitle") || null,
     },
     cover: img.attr("src"),
-    type: elem.find(".taglist span:not(.dub)").first().text(),
+    type: elem.find(".taglist span:not(.dub)").first().text() || null,
     episode: elem.find(".ep").text(),
     dub: !!elem.find(".dub").length,
   };
@@ -107,7 +107,7 @@ class BaseController {
           backdrop: backdropSty.slice(22, -2),
           title: {
             en: t.text(),
-            jp: t.data("jtitle"),
+            jp: t.data("jtitle") || null,
           },
           synopsis: elem.find("p").text(),
         };
@@ -217,7 +217,7 @@ class BaseController {
             id: a.attr("href").split("/")[2],
             title: {
               en: a.text(),
-              jp: a.data("jtitle"),
+              jp: a.data("jtitle") || null,
             },
             cover: elem.find("img").attr("src"),
             episode: m[0],
@@ -234,11 +234,11 @@ class BaseController {
         success: true,
         details: {
           id,
-          thumb: $(".backdrop").attr("style").slice(23, -2),
+          thumb: $(".backdrop").attr("style").slice(23, -2) || null,
           cover: $(".thumb img").first().attr("src"),
           title: {
             en: title.text(),
-            jp: title.data("jtitle"),
+            jp: title.data("jtitle") || null,
           },
           alias: $(".alias").text(),
           desc: $(".shorting").text(),
@@ -293,8 +293,8 @@ class BaseController {
       const { url } = await this.Reqbin.fetchEpisode(id);
       if (!url) throw new Error("Data not found");
 
-      const decrypted = decrypt(url);
       raw = url;
+      const decrypted = decrypt(url);
       rawUrl = decrypted;
 
       res.json({ success: true, url: decrypted });
@@ -408,7 +408,7 @@ class BaseController {
           id: elem.find("a").attr("href").split("/")[4],
           title: {
             en: t.text(),
-            jp: t.data("jtitle"),
+            jp: t.data("jtitle") || null,
           },
           time: elem.find("time").text(),
           episode: elem.find(".ep").text(),
