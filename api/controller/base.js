@@ -125,9 +125,14 @@ class BaseController {
     );
     return data;
   };
-  filterRequest = async (filters) => {
+  filterRequest = async (filters, page) => {
+    const useToken = filters.length === 1 && filters[0][0] === "keyword";
+    if (useToken) filters.push(["verified", encrypt(filters[0][1])]);
     const { data } = await this.Agent.get(
-      `filter?${new URLSearchParams(filters)}`
+      `${useToken ? "search" : "filter"}?${new URLSearchParams([
+        ...filters,
+        ["page", page],
+      ])}`
     );
     const $ = cheerio.load(data);
     return {
@@ -203,10 +208,10 @@ class BaseController {
     try {
       const { query } = req.params;
       const page = req.query.page ?? 1;
-      const { next, results } = await this.filterRequest({
-        keyword: query,
-        page,
-      });
+      const { next, results } = await this.filterRequest(
+        [["keyword", query]],
+        page
+      );
 
       res.json({
         success: true,
@@ -411,16 +416,17 @@ class BaseController {
         };
         return this.browse(req, res);
       }
-      query.push(["page", page]);
 
-      const { next, results } = await this.filterRequest(query);
+      const { next, results } = await this.filterRequest(query, page);
       query.pop();
-      query.push(["page", +page + 1]);
 
       res.json({
         success: true,
         next: next
-          ? `${domain + req.path.substr(1)}?${new URLSearchParams(query)}`
+          ? `${domain + req.path.substr(1)}?${new URLSearchParams([
+              ...query,
+              ["page", page],
+            ])}`
           : null,
         results,
       });
