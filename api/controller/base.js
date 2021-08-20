@@ -520,6 +520,7 @@ class BaseController {
       query.cursor = next;
       res.json({
         success: true,
+        thread,
         total,
         next: hasNext
           ? `${domain + req.path.substr(1)}?${new URLSearchParams({
