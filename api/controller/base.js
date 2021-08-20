@@ -552,12 +552,12 @@ class BaseController {
         )}`
       );
 
-      const action_average = reactions[0].vote;
-      const action_funny = reactions[1].vote;
-      const action_amazing = reactions[2].vote;
-      const action_surprised = reactions[3].vote;
-      const action_sad = reactions[4].vote;
-      const action_angry = reactions[5].vote;
+      const action_average = reactions[0].votes;
+      const action_funny = reactions[1].votes;
+      const action_amazing = reactions[2].votes;
+      const action_surprised = reactions[3].votes;
+      const action_sad = reactions[4].votes;
+      const action_angry = reactions[5].votes;
 
       res.json({
         success: true,
