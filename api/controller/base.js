@@ -100,13 +100,14 @@ const parseComment = ({
     avatar: { cache },
   },
 }) => {
+  const member_img = (cache.startsWith("//") ? "https:" : "") + cache;
   return {
     text: raw_message,
     media,
     likes,
     dislikes,
     member_name: name,
-    member_img: cache,
+    member_img,
     createdAt,
   };
 };
@@ -527,6 +528,52 @@ class BaseController {
             })}`
           : null,
         comments,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        success: false,
+        message: error.toString(),
+      });
+    }
+  }
+  async reactions(req, res) {
+    try {
+      const {
+        data: {
+          response: { reactions },
+        },
+      } = await axios.get(
+        `https://disqus.com/api/3.0/threadReactions/loadReactions?${new URLSearchParams(
+          {
+            thread: req.params.thread,
+            api_key: DisqusKey,
+          }
+        )}`
+      );
+
+      const action_average = reactions[0].vote;
+      const action_funny = reactions[1].vote;
+      const action_amazing = reactions[2].vote;
+      const action_surprised = reactions[3].vote;
+      const action_sad = reactions[4].vote;
+      const action_angry = reactions[5].vote;
+
+      res.json({
+        success: true,
+        total_response:
+          action_average +
+          action_funny +
+          action_amazing +
+          action_surprised +
+          action_sad +
+          action_angry,
+        action_average,
+        action_funny,
+        action_amazing,
+        action_surprised,
+        action_sad,
+        action_angry,
       });
     } catch (error) {
       console.log(error);
