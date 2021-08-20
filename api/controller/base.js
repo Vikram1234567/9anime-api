@@ -1,8 +1,11 @@
+const axios = require("axios");
 const cheerio = require("cheerio");
 const domain = process.env.DOMAIN ?? "http://localhost:5000/";
-
+const DisqusKey =
+  "E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F";
 const btoa = (data) => Buffer.from(data, "binary").toString("base64");
 const atob = (data) => Buffer.from(data, "base64").toString("binary");
+
 function randomString(length) {
   var mask = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
   var result = "";
@@ -50,6 +53,23 @@ const encrypt = (data) => {
   }
   return t + btoa(x);
 };
+async function getThread(ident) {
+  const {
+    data: {
+      response: { id, posts },
+    },
+  } = await axios.get(
+    `https://disqus.com/api/3.0/threads/details.json?${new URLSearchParams({
+      "thread:ident": ident,
+      forum: "9anime-to",
+      api_key: DisqusKey,
+    })}`
+  );
+  return {
+    id: id,
+    total: posts,
+  };
+}
 
 const parseCard = (e) => {
   const elem = cheerio.default(e);
@@ -69,22 +89,44 @@ const parseCard = (e) => {
     dub: !!elem.find(".dub").length,
   };
 };
+const parseComment = ({
+  raw_message,
+  likes,
+  dislikes,
+  createdAt,
+  media,
+  author: {
+    name,
+    avatar: { cache },
+  },
+}) => {
+  return {
+    text: raw_message,
+    media,
+    likes,
+    dislikes,
+    member_name: name,
+    member_img: cache,
+    createdAt,
+  };
+};
 
 class BaseController {
   constructor(agent, reqbin) {
     this.Agent = agent;
     this.Reqbin = reqbin;
+    this.cache = new Map();
   }
 
   ajaxRequest = async (path, query) => {
     const { data } = await this.Agent.get(
-      `ajax/${path}?${new URLSearchParams(query).toString()}`
+      `ajax/${path}?${new URLSearchParams(query)}`
     );
     return data;
   };
   filterRequest = async (filters) => {
     const { data } = await this.Agent.get(
-      `filter?${new URLSearchParams(filters).toString()}`
+      `filter?${new URLSearchParams(filters)}`
     );
     const $ = cheerio.load(data);
     return {
@@ -377,9 +419,7 @@ class BaseController {
       res.json({
         success: true,
         next: next
-          ? `${domain + req.path.substr(1)}?${new URLSearchParams(
-              query
-            ).toString()}`
+          ? `${domain + req.path.substr(1)}?${new URLSearchParams(query)}`
           : null,
         results,
       });
@@ -438,6 +478,58 @@ class BaseController {
       });
     } catch (error) {
       console.error(error);
+      res.status(500).json({
+        success: false,
+        message: error.toString(),
+      });
+    }
+  }
+  async comments(req, res) {
+    let { id, thread, ep, ...query } = req.query;
+    if (!id && !thread)
+      return res.status(400).json({
+        success: false,
+        message: "Missing required argument",
+      });
+    let total = null;
+    try {
+      if (!thread) {
+        const ident = id + (ep ? `_${ep}` : "");
+        const threadData = this.cache.get(ident) || (await getThread(ident));
+        if (!threadData)
+          return res.status(404).json({
+            success: false,
+            message: "Data not found",
+          });
+        thread = threadData.id;
+        total = threadData.total;
+      }
+
+      const { data } = await axios.get(
+        `https://disqus.com/api/3.0/posts/list.json?${new URLSearchParams({
+          thread,
+          forum: "9anime-to",
+          api_key: DisqusKey,
+          ...query,
+        })}`
+      );
+
+      const comments = data.response.map(parseComment);
+      const { hasNext, next } = data.cursor;
+      query.cursor = next;
+      res.json({
+        success: true,
+        total,
+        next: hasNext
+          ? `${domain + req.path.substr(1)}?${new URLSearchParams({
+              thread,
+              ...query,
+            })}`
+          : null,
+        comments,
+      });
+    } catch (error) {
+      console.log(error);
       res.status(500).json({
         success: false,
         message: error.toString(),

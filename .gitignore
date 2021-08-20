@@ -3,4 +3,5 @@ package-lock.json
 tes.js
 vercel.json
 .vercel
+.env
 /temp

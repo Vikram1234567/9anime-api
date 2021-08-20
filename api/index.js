@@ -43,6 +43,7 @@ Promise.all([Agent.init(), Reqbin.init()]).then(() => {
   app.get("/episode/:id", Base.episode.bind(Base));
   app.get("/filter", Base.filter.bind(Base));
   app.get("/schedule", Base.schedule.bind(Base));
+  app.get("/comments", Base.comments.bind(Base));
   app.use("/user", authRoutes);
   app.use("*", (req, res) => {
     res.status(404).json({
