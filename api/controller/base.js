@@ -418,7 +418,6 @@ class BaseController {
       }
 
       const { next, results } = await this.filterRequest(query, page);
-      query.pop();
 
       res.json({
         success: true,
