@@ -90,11 +90,11 @@ const parseCard = (e) => {
   };
 };
 const parseComment = ({
+  message,
   raw_message,
   likes,
   dislikes,
   createdAt,
-  media,
   author: {
     name,
     avatar: { cache },
@@ -103,12 +103,12 @@ const parseComment = ({
 }) => {
   const member_img = (cache.startsWith("//") ? "https:" : "") + cache;
   return {
-    text: raw_message,
-    media,
-    likes,
-    dislikes,
     member_name: name,
     member_img,
+    message,
+    raw_message,
+    likes,
+    dislikes,
     createdAt,
     depth,
   };
