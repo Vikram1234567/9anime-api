@@ -99,6 +99,7 @@ const parseComment = ({
     name,
     avatar: { cache },
   },
+  depth,
 }) => {
   const member_img = (cache.startsWith("//") ? "https:" : "") + cache;
   return {
@@ -109,6 +110,7 @@ const parseComment = ({
     member_name: name,
     member_img,
     createdAt,
+    depth,
   };
 };
 
@@ -512,12 +514,14 @@ class BaseController {
       }
 
       const { data } = await axios.get(
-        `https://disqus.com/api/3.0/posts/list.json?${new URLSearchParams({
-          thread,
-          forum: "9anime-to",
-          api_key: DisqusKey,
-          ...query,
-        })}`
+        `https://disqus.com/api/3.0/threads/listPostsThreaded?${new URLSearchParams(
+          {
+            thread,
+            forum: "9anime-to",
+            api_key: DisqusKey,
+            ...query,
+          }
+        )}`
       );
 
       const comments = data.response.map(parseComment);
